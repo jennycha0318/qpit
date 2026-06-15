@@ -749,6 +749,138 @@ async function shareResult() {
   canvas.toBlob(finish, "image/png");
 }
 
+// ══════════════ 회원가입·로그인 (Mock, localStorage) ══════════════
+// ※ 데모용 로컬 인증입니다. 실제 서비스는 Supabase Auth 또는
+//   NextAuth(Google 포함) + 서버 DB로 구현합니다.
+//   (docs/product/auth-and-history.md)
+const LS_USERS = "pacemaker_users";
+const LS_SESSION = "pacemaker_session";
+let currentUser = null;
+
+function lsGet(k, fb) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? fb : v; } catch (e) { return fb; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function hashPw(pw) { try { return btoa(unescape(encodeURIComponent(pw))); } catch (e) { return pw; } } // 데모용(비보안)
+const emailOk = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+
+function doSignup() {
+  const name = document.getElementById("suName").value.trim();
+  const email = document.getElementById("suEmail").value.trim().toLowerCase();
+  const pw = document.getElementById("suPw").value;
+  const err = document.getElementById("suErr");
+  if (!name) return void (err.textContent = "이름(닉네임)을 입력해 주세요.");
+  if (!emailOk(email)) return void (err.textContent = "올바른 이메일을 입력해 주세요.");
+  if (pw.length < 4) return void (err.textContent = "비밀번호는 4자 이상이어야 해요.");
+  const users = lsGet(LS_USERS, {});
+  if (users[email]) return void (err.textContent = "이미 가입된 이메일이에요. 로그인해 주세요.");
+  users[email] = { email, name, pw: hashPw(pw), provider: "email" };
+  lsSet(LS_USERS, users);
+  err.textContent = "";
+  finishAuth(email);
+}
+function doLogin() {
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const pw = document.getElementById("loginPw").value;
+  const err = document.getElementById("loginErr");
+  const u = lsGet(LS_USERS, {})[email];
+  if (!u || u.pw !== hashPw(pw)) return void (err.textContent = "이메일 또는 비밀번호가 올바르지 않아요.");
+  err.textContent = "";
+  finishAuth(email);
+}
+function googleLogin() {
+  // 데모: 실제로는 Google OAuth 팝업. 여기선 데모 구글 계정으로 로그인.
+  const email = "demo.user@gmail.com";
+  const users = lsGet(LS_USERS, {});
+  if (!users[email]) users[email] = { email, name: "구글 사용자", provider: "google" };
+  lsSet(LS_USERS, users);
+  finishAuth(email);
+}
+function doReset() {
+  const email = document.getElementById("rsEmail").value.trim().toLowerCase();
+  const err = document.getElementById("rsErr");
+  const ok = document.getElementById("rsOk");
+  err.textContent = ""; ok.textContent = "";
+  if (!emailOk(email)) return void (err.textContent = "올바른 이메일을 입력해 주세요.");
+  ok.textContent = "재설정 링크를 이메일로 보냈어요. (데모)";
+}
+function finishAuth(email) {
+  currentUser = lsGet(LS_USERS, {})[email];
+  lsSet(LS_SESSION, email);
+  screenHistory.length = 0;
+  refreshHomeUI();
+  showScreen("screen-home", true);
+}
+function logout() {
+  currentUser = null;
+  localStorage.removeItem(LS_SESSION);
+  screenHistory.length = 0;
+  showScreen("screen-landing", true);
+}
+function refreshHomeUI() {
+  const n = document.getElementById("homeName");
+  if (n && currentUser) n.textContent = (currentUser.name || "사용자") + "님";
+}
+function goHome() {
+  reset();
+  screenHistory.length = 0;
+  if (currentUser) { refreshHomeUI(); showScreen("screen-home", true); }
+  else showScreen("screen-landing", true);
+}
+
+// ══════════════ 진단 히스토리 ══════════════
+const STAGE_LABEL = { crush: "썸", dating: "연애 중", breakup: "이별 후" };
+function histKey() { return "pacemaker_history_" + (currentUser ? currentUser.email : "guest"); }
+function loadHistory() { return lsGet(histKey(), []); }
+function saveDiagnosisToHistory(d) {
+  if (!currentUser) return;
+  const h = loadHistory();
+  h.unshift({ id: "dx_" + new Date().getTime(), ts: new Date().getTime(), stage: state.stage, d });
+  lsSet(histKey(), h.slice(0, 50));
+}
+function fmtDate(ts) {
+  const dt = new Date(ts), p = (n) => String(n).padStart(2, "0");
+  return `${dt.getFullYear()}.${p(dt.getMonth() + 1)}.${p(dt.getDate())} ${p(dt.getHours())}:${p(dt.getMinutes())}`;
+}
+function renderHistory() {
+  const list = document.getElementById("historyList");
+  const items = loadHistory();
+  if (!items.length) {
+    list.innerHTML = `<div class="empty">아직 진단 기록이 없어요.<br />새 진단을 시작해 보세요.</div>`;
+    return;
+  }
+  list.innerHTML = items.map((it) => {
+    const d = it.d;
+    const color = d.score >= 65 ? "var(--good)" : d.score >= 45 ? "var(--warn)" : "var(--bad)";
+    return `<button class="hist-item" data-action="openHistory" data-id="${it.id}">
+      <div class="hist-score" style="color:${color};background:${color}1a">${d.score}</div>
+      <div class="hist-body">
+        <b>${STAGE_LABEL[it.stage] || ""} · ${d.scoreTitle}</b>
+        <span class="hist-when">${d.plan ? d.plan.when : ""}</span>
+        <span class="hist-date">${fmtDate(it.ts)}</span>
+      </div>
+    </button>`;
+  }).join("");
+}
+function openHistory(id) {
+  const it = loadHistory().find((x) => x.id === id);
+  if (!it) return;
+  state.stage = it.stage;
+  renderReport(it.d);
+  showScreen("screen-report");
+}
+function renderProfile() {
+  const body = document.getElementById("profileBody");
+  if (!body || !currentUser) return;
+  const count = loadHistory().length;
+  const prov = currentUser.provider === "google" ? "Google 계정" : "이메일";
+  body.innerHTML = `
+    <div class="report-card">
+      <div class="prof-row"><span>이름</span><b>${currentUser.name || "-"}</b></div>
+      <div class="prof-row"><span>이메일</span><b>${currentUser.email}</b></div>
+      <div class="prof-row"><span>로그인 방식</span><b>${prov}</b></div>
+      <div class="prof-row"><span>진단 횟수</span><b>${count}회</b></div>
+    </div>`;
+}
+
 // ── 화면 전환 + 뒤로가기 ──────────────────────
 function showScreen(id, isBack) {
   const cur = document.querySelector(".screen.is-active")?.id;
@@ -757,7 +889,7 @@ function showScreen(id, isBack) {
   document.getElementById(id).classList.add("is-active");
   const back = document.getElementById("backBtn");
   if (back) back.style.visibility =
-    (id === "screen-landing" || id === "screen-analyzing") ? "hidden" : "visible";
+    (id === "screen-landing" || id === "screen-analyzing" || id === "screen-home") ? "hidden" : "visible";
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -770,7 +902,7 @@ function goBack() {
     return;
   }
   const prev = screenHistory.pop();
-  showScreen(prev || "screen-landing", true);
+  showScreen(prev || (currentUser ? "screen-home" : "screen-landing"), true);
 }
 
 // ── 설문 렌더링 ───────────────────────────────
@@ -849,6 +981,7 @@ function runAnalysis() {
       clearInterval(timer);
       const d = personalize(diagnose(state.stage, state.answers), state.answers.freeText);
       renderReport(d);
+      saveDiagnosisToHistory(d);
       showScreen("screen-report");
     }
   }, 620);
@@ -977,10 +1110,22 @@ document.addEventListener("click", (e) => {
   const action = e.target.closest("[data-action]")?.dataset.action;
   const stageBtn = e.target.closest("[data-stage]");
 
-  if (action === "start") showScreen("screen-stage");
+  if (action === "enter") showScreen(currentUser ? "screen-home" : "screen-login");
+  else if (action === "start") showScreen("screen-stage");
   else if (action === "back") goBack();
-  else if (action === "home") { reset(); screenHistory.length = 0; showScreen("screen-landing", true); }
+  else if (action === "home") goHome();
   else if (action === "restart") { reset(); screenHistory.length = 0; showScreen("screen-stage", true); }
+  else if (action === "gotoLogin") showScreen("screen-login");
+  else if (action === "gotoSignup") showScreen("screen-signup");
+  else if (action === "gotoReset") showScreen("screen-reset");
+  else if (action === "doLogin") doLogin();
+  else if (action === "doSignup") doSignup();
+  else if (action === "doReset") doReset();
+  else if (action === "googleLogin") googleLogin();
+  else if (action === "logout") logout();
+  else if (action === "history") { renderHistory(); showScreen("screen-history"); }
+  else if (action === "profile") { renderProfile(); showScreen("screen-profile"); }
+  else if (action === "openHistory") openHistory(e.target.closest("[data-action]").dataset.id);
   else if (action === "message") { resetMessageInput(); showScreen("screen-message"); }
   else if (action === "analyzeMsg") runMessageAnalysis();
   else if (action === "pickImage") document.getElementById("msgImageInput")?.click();
@@ -1007,3 +1152,12 @@ document.addEventListener("change", (e) => {
 
 // 업로드 영역 초기 렌더 (프롬프트 버튼 표시)
 renderImagePreview();
+
+// 세션 복원 — 로그인 상태면 홈으로
+(function initAuth() {
+  const email = lsGet(LS_SESSION, null);
+  if (email) {
+    const u = lsGet(LS_USERS, {})[email];
+    if (u) { currentUser = u; refreshHomeUI(); showScreen("screen-home", true); }
+  }
+})();
