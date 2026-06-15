@@ -36,7 +36,15 @@ const SELF_URGENCY_Q = {
     { v: "high", label: "조급하고 안절부절못해요", note: "주의" },
   ],
 };
-const COMMON = [PARTNER_Q, SELF_ATTACH_Q, SELF_URGENCY_Q];
+// 자유서술 — AI 개인화의 핵심 입력 (선택)
+const FREE_TEXT_Q = {
+  id: "freeText",
+  type: "text",
+  title: "상황을 자유롭게 적어주세요",
+  desc: "무슨 일이 있었는지, 무엇이 가장 고민인지 적을수록 AI가 더 맞춤으로 분석해요. (선택)",
+  placeholder: "예) 일이 바빠서 소홀했고, 마지막에 크게 싸우고 헤어졌어요. 아직 많이 보고 싶은데 먼저 연락해도 될지 모르겠어요…",
+};
+const COMMON = [PARTNER_Q, SELF_ATTACH_Q, SELF_URGENCY_Q, FREE_TEXT_Q];
 
 // ── 설문 정의 (상황별 분기) ───────────────────
 const SURVEYS = {
@@ -338,6 +346,45 @@ function diagnoseBreakup(a) {
   return res;
 }
 
+// ══════════════ Mock AI 개인화 레이어 ══════════════
+// ※ 실제 제품에서는 이 자리에 Claude API 호출이 들어간다.
+//   (docs/product/ai-personalization.md §10) 점수·요인은 규칙 엔진이
+//   그대로 결정하고, AI는 자유서술을 반영해 '문장'만 개인화한다.
+const THEMES = [
+  { keys: ["싸웠", "다퉜", "싸움", "말다툼", "화났", "화내", "다툼"], label: "다툼으로 끝난 마지막", tip: "재접촉 땐 변명보다, 그때 상대가 느꼈을 감정을 짧게 인정하는 한마디가 더 효과적이에요." },
+  { keys: ["바빠", "바빴", "바쁨", "일이", "직장", "회사", "시험", "취업", "야근"], label: "바빠서 소홀했던 상황", tip: "‘환경 때문이었다’는 점을 강조하기보다, 달라진 모습을 행동으로 보여주는 편이 설득력 있어요." },
+  { keys: ["보고싶", "보고 싶", "그리워", "그립", "생각나", "생각이"], label: "여전히 큰 그리움", tip: "그리움이 클수록 연락이 급해지기 쉬워요. 보내기 전 한 번 더, ‘지금이 적기인지’ 점수를 신뢰하세요." },
+  { keys: ["미안", "잘못", "후회", "내 탓"], label: "미안함·후회", tip: "사과는 짧고 구체적으로. 길고 반복되는 사과는 오히려 부담이 돼요." },
+  { keys: ["새로운", "다른 사람", "새 사람", "썸", "환승"], label: "상대의 새로운 인연 가능성", tip: "끼어드는 연락은 역효과예요. 거리를 두고 내 일상을 회복하는 데 집중하세요." },
+  { keys: ["멀리", "장거리", "이사", "유학", "지방", "해외"], label: "물리적 거리 문제", tip: "거리는 환경적 요인이라 회복 여지가 있어요. 다만 만남 빈도에 대한 현실적 합의가 필요해요." },
+  { keys: ["읽씹", "답장", "안 읽", "씹", "연락이 없", "답이 없"], label: "연락 단절·읽씹", tip: "답이 없을 땐 연달아 보내지 마세요. 한 번의 가벼운 안부 후 충분히 기다리는 것이 원칙이에요." },
+  { keys: ["불안", "초조", "집착", "확인", "매달"], label: "커진 불안감", tip: "불안에서 나온 행동은 대부분 역효과예요. 보내고 싶은 충동은 메모로 옮겨두고 하루 묵혀보세요." },
+];
+
+function personalize(d, rawText) {
+  const text = (rawText || "").trim();
+  d.aiApplied = false;
+  if (text.length < 4) return d;
+
+  const found = [];
+  for (const t of THEMES) {
+    if (t.keys.some((k) => text.includes(k))) found.push(t);
+    if (found.length >= 3) break;
+  }
+  if (!found.length) {
+    // 키워드 미감지 — 그래도 개인화 시도했음을 표시
+    d.aiApplied = true;
+    d.aiConsiderations = [{ label: "직접 적어주신 맥락", tip: "적어주신 상황을 진단 해석에 반영했어요. 더 구체적으로 적을수록 맞춤도가 높아져요." }];
+    return d;
+  }
+
+  d.aiApplied = true;
+  d.aiConsiderations = found.map((t) => ({ label: t.label, tip: t.tip }));
+  // 개인화된 근거 한 줄 덧붙이기 (점수는 그대로)
+  d.reason = `적어주신 내용에서 ‘${found[0].label}’이 핵심 변수로 보여요. ` + d.reason;
+  return d;
+}
+
 // ── 화면 전환 ─────────────────────────────────
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("is-active"));
@@ -358,6 +405,25 @@ function renderQuestion() {
 
   const box = document.getElementById("qOptions");
   box.innerHTML = "";
+
+  // 자유서술(텍스트) 질문
+  if (q.type === "text") {
+    box.innerHTML = `
+      <p class="q-desc">${q.desc || ""}</p>
+      <textarea id="freeText" class="q-textarea" placeholder="${q.placeholder || ""}">${state.answers.freeText || ""}</textarea>
+      <button class="btn btn-primary" id="btnFinish">✨ AI 진단 받기</button>
+      <button class="btn btn-ghost" id="btnSkip">건너뛰고 진단하기</button>`;
+    box.querySelector("#btnFinish").onclick = () => {
+      state.answers.freeText = box.querySelector("#freeText").value;
+      runAnalysis();
+    };
+    box.querySelector("#btnSkip").onclick = () => {
+      state.answers.freeText = "";
+      runAnalysis();
+    };
+    return;
+  }
+
   q.options.forEach((opt) => {
     const btn = document.createElement("button");
     btn.className = "q-option" + (state.answers[q.id] === opt.v ? " selected" : "");
@@ -401,7 +467,8 @@ function runAnalysis() {
     if (i < steps.length) el.textContent = steps[i];
     else {
       clearInterval(timer);
-      renderReport(diagnose(state.stage, state.answers));
+      const d = personalize(diagnose(state.stage, state.answers), state.answers.freeText);
+      renderReport(d);
       showScreen("screen-report");
     }
   }, 620);
@@ -439,6 +506,21 @@ function renderReport(d) {
     ? `<div class="msg-hold">${d.hold}</div>`
     : `<div class="msg-bubble">${d.msg}</div>`;
 
+  // AI 개인화 카드 (자유서술 반영)
+  const aiHtml = d.aiApplied
+    ? `<div class="report-card ai-card">
+        <p class="card-label ai-label">✨ AI가 당신의 상황을 추가로 반영했어요</p>
+        <ul class="ai-list">
+          ${d.aiConsiderations.map((c) => `
+            <li class="ai-item">
+              <b>${c.label}</b>
+              <span>${c.tip}</span>
+            </li>`).join("")}
+        </ul>
+        <p class="ai-foot">실제 서비스에서는 이 부분을 Claude가 당신의 글을 읽고 실시간으로 작성합니다.</p>
+      </div>`
+    : "";
+
   document.getElementById("report").innerHTML = `
     <div class="report-card score-card">
       <p class="score-title">${d.scoreTitle}</p>
@@ -456,6 +538,8 @@ function renderReport(d) {
       <span class="score-badge" style="color:${color};background:${color}1a">${badge}</span>
       <p class="score-reason">${d.reason}</p>
     </div>
+
+    ${aiHtml}
 
     <div class="report-card">
       <p class="card-label">🔍 이렇게 판단했어요</p>

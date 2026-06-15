@@ -185,6 +185,26 @@ body {
   font-weight: 700;
 }
 .q-option .opt-note { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+/* 자유서술 입력 */
+.q-desc { font-size: 14px; color: var(--muted); margin-bottom: 14px; margin-top: -10px; }
+.q-textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.q-textarea:focus { outline: none; border-color: var(--primary); }
+.q-textarea::placeholder { color: #bdb6c4; }
+#btnFinish { margin-bottom: 10px; }
+
 .survey-nav { margin-top: 22px; }
 #btnPrev { width: auto; padding: 10px 18px; font-size: 14px; }
 
@@ -315,6 +335,22 @@ body {
   padding: 12px 14px;
 }
 .risk-item::before { content: "⚠️"; flex-shrink: 0; }
+
+/* AI 개인화 카드 */
+.ai-card {
+  background: linear-gradient(135deg, #f3f0fd, #fdeef4);
+  border: 1px solid #e6def8;
+}
+.ai-label { color: var(--accent); }
+.ai-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.ai-item {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  padding: 13px 15px;
+}
+.ai-item b { display: block; font-size: 14.5px; margin-bottom: 3px; }
+.ai-item span { font-size: 13.5px; color: #6a6478; }
+.ai-foot { font-size: 11.5px; color: var(--accent); margin-top: 14px; text-align: center; opacity: 0.85; }
 
 /* Message draft */
 .msg-card { background: linear-gradient(135deg, #fef7f8, #f6f2fd); }
