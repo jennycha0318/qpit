@@ -283,6 +283,27 @@ body {
 .action-body b { display: block; font-size: 15px; margin-bottom: 2px; }
 .action-body span { font-size: 13px; color: var(--muted); }
 
+/* 판단 근거 (factors) */
+.factor-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.factor-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  padding: 9px 12px;
+  border-radius: 11px;
+  background: #f8f5f9;
+}
+.factor-item.pos { background: #eef8f1; }
+.factor-item.neg { background: #fdf2f0; }
+.factor-sign { font-size: 11px; flex-shrink: 0; }
+.factor-item.pos .factor-sign { color: var(--good); }
+.factor-item.neg .factor-sign { color: var(--bad); }
+.factor-label { flex: 1; }
+.factor-delta { font-weight: 700; font-size: 13px; flex-shrink: 0; }
+.factor-item.pos .factor-delta { color: var(--good); }
+.factor-item.neg .factor-delta { color: var(--bad); }
+
 .risk-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
 .risk-item {
   display: flex;
