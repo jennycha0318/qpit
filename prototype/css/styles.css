@@ -336,6 +336,100 @@ body {
 }
 .risk-item::before { content: "⚠️"; flex-shrink: 0; }
 
+/* 메시지 해석 — 온도 게이지 */
+.msg-hint { font-size: 13px; color: var(--bad); margin: -4px 0 12px; min-height: 16px; }
+.temp-gauge {
+  position: relative;
+  height: 16px;
+  border-radius: 99px;
+  margin: 14px 0 8px;
+  background: linear-gradient(90deg, #5aa9e6 0%, #e0c14a 50%, #e0607d 100%);
+}
+.temp-marker {
+  position: absolute;
+  top: -5px;
+  width: 18px;
+  height: 26px;
+  border-radius: 8px;
+  background: #fff;
+  border: 3px solid var(--text);
+  transition: left 0.9s ease;
+}
+.temp-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+/* 연락 플랜 (언제·어떻게) */
+.plan-when {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  letter-spacing: -0.3px;
+}
+.plan-channel {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-weight: 500;
+}
+.plan-channel span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  background: #f0ecfb;
+  padding: 3px 9px;
+  border-radius: 99px;
+}
+.plan-steps {
+  list-style: none;
+  position: relative;
+  padding-left: 8px;
+}
+.plan-steps::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--line);
+}
+.plan-step {
+  position: relative;
+  padding-left: 26px;
+  padding-bottom: 16px;
+}
+.plan-step:last-child { padding-bottom: 0; }
+.plan-step::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2.5px solid var(--surface);
+  box-shadow: 0 0 0 1.5px var(--primary);
+}
+.plan-time {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 2px;
+}
+.plan-action { font-size: 14px; color: var(--text); }
+
 /* AI 개인화 카드 */
 .ai-card {
   background: linear-gradient(135deg, #f3f0fd, #fdeef4);

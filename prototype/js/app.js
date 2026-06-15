@@ -7,6 +7,7 @@
 
 // ── 상태 ──────────────────────────────────────
 const state = { stage: null, qIndex: 0, answers: {} };
+let lastDiag = null; // 공유용 마지막 진단 결과
 
 // ── 공통 질문 (상대 성향 + 나의 성향/심리) ─────
 const PARTNER_Q = {
@@ -162,9 +163,120 @@ const clamp = (n) => Math.max(3, Math.min(97, Math.round(n)));
 
 // ── 진단 디스패치 ─────────────────────────────
 function diagnose(stage, a) {
-  if (stage === "crush") return diagnoseCrush(a);
-  if (stage === "dating") return diagnoseDating(a);
-  return diagnoseBreakup(a);
+  let res;
+  if (stage === "crush") res = diagnoseCrush(a);
+  else if (stage === "dating") res = diagnoseDating(a);
+  else res = diagnoseBreakup(a);
+  res.plan = makePlan(stage, res.score, a); // 언제·어떻게 연락 플랜
+  return res;
+}
+
+// ══════════════ 연락 플랜 — 언제·어떻게 ══════════════
+// 점수 구간 + 핵심 상황 변수로 "추천 시점 + 수단 + 단계별 순서"를 생성
+function makePlan(stage, score, a) {
+  const tier = score >= 65 ? "high" : score >= 45 ? "mid" : "low";
+  if (stage === "crush") return planCrush(tier);
+  if (stage === "dating") return planDating(tier);
+  return planBreakup(tier, a);
+}
+
+function planBreakup(tier, a) {
+  if (a.contact === "blocked") {
+    return {
+      when: "지금은 연락하지 마세요", tone: "bad",
+      channel: "모든 연락 중단",
+      steps: [
+        { time: "지금", action: "카톡·전화·SNS·지인 경유 등 모든 접근을 멈추세요." },
+        { time: "충분한 시간 뒤 (차단 해제 시)", action: "아주 가벼운 안부부터 천천히 재고하세요." },
+      ],
+    };
+  }
+  const tooSoon = a.since === "lt1w" || a.since === "1to2w";
+  if (tier === "high") return {
+    when: "오늘~3일 내가 첫 연락 적기", tone: "good",
+    channel: "카카오톡 — 가벼운 안부 한 통",
+    steps: [
+      { time: "오늘~3일 내", action: "재회 얘기는 빼고, 부담 없는 안부 한 통만 보내세요." },
+      { time: "답이 따뜻하면 +2~3일", action: "낮 시간·짧은 만남을 가볍게 제안하세요." },
+      { time: "만남 이후", action: "말보다 달라진 모습으로 신뢰를 회복하고, 속도는 천천히." },
+      { time: "무응답·냉담할 때", action: "연달아 보내지 말고 최소 1~2주 기다린 뒤 재평가하세요." },
+    ],
+  };
+  if (tier === "mid") return {
+    when: tooSoon ? "지금은 일러요 — 2~3주 더 기다린 뒤" : "2~3주 더 거리를 둔 뒤", tone: "warn",
+    channel: "지금은 보류 → 이후 카톡 안부",
+    steps: [
+      { time: "지금~2주", action: "연락을 멈추고 나를 회복하며 이별 원인을 복기하세요." },
+      { time: "2~3주 후", action: "가벼운 안부 한 통으로 상대 반응을 테스트하세요." },
+      { time: "반응이 좋으면", action: "대화를 조금씩 늘리며 자연스럽게 접점을 회복하세요." },
+    ],
+  };
+  return {
+    when: "지금은 연락하지 마세요", tone: "bad",
+    channel: "무연락 유지",
+    steps: [
+      { time: "지금~최소 3~4주", action: "무연락을 유지하고 일상·멘탈 회복을 최우선으로." },
+      { time: "한 달 뒤", action: "미련인지 사랑인지 점검한 후 다시 진단해 보세요." },
+    ],
+  };
+}
+
+function planCrush(tier) {
+  if (tier === "high") return {
+    when: "이번 주 안이 고백 적기", tone: "good",
+    channel: "직접 만남 또는 통화",
+    steps: [
+      { time: "2~3일 내", action: "둘만의 편안한 자리를 만드세요." },
+      { time: "그 자리에서", action: "부담 낮은 말로 솔직하게 마음을 전하세요." },
+      { time: "고백 후", action: "답을 재촉하지 말고 상대의 시간을 존중하세요." },
+    ],
+  };
+  if (tier === "mid") return {
+    when: "1~2주 더 가까워진 뒤", tone: "warn",
+    channel: "카카오톡 — 만남 제안 먼저",
+    steps: [
+      { time: "이번 주", action: "둘만의 만남을 자연스럽게 제안하세요." },
+      { time: "만남에서", action: "가벼운 관심 표현으로 상대 반응을 확인하세요." },
+      { time: "호감 신호가 늘면", action: "그때 고백 타이밍을 다시 진단하세요." },
+    ],
+  };
+  return {
+    when: "지금은 고백을 보류하세요", tone: "bad",
+    channel: "가벼운 일상 공유 유지",
+    steps: [
+      { time: "당분간", action: "편한 접점은 유지하되 내 연락 비중을 줄이세요." },
+      { time: "상대가 다가오면", action: "그때 관계 진전을 고려하세요." },
+    ],
+  };
+}
+
+function planDating(tier) {
+  if (tier === "high") return {
+    when: "가까운 데이트 때 가볍게", tone: "good",
+    channel: "직접 — 얼굴 보고",
+    steps: [
+      { time: "다음 만남", action: "고마움·애정을 구체적으로 표현하세요." },
+      { time: "평소", action: "둘만의 정기 루틴(데이트·대화)을 유지하세요." },
+    ],
+  };
+  if (tier === "mid") return {
+    when: "이번 주말 등 차분한 시점에", tone: "warn",
+    channel: "직접 — 감정이 가라앉은 때",
+    steps: [
+      { time: "차분한 자리에서", action: "‘요즘 우리 어때?’ 열린 질문으로 대화를 시작하세요." },
+      { time: "대화 중", action: "비난 없이 내 마음을 ‘나 전달법’으로 전하세요." },
+      { time: "이후", action: "함께 웃는 작은 경험을 의도적으로 늘리세요." },
+    ],
+  };
+  return {
+    when: "빠른 시일 내 점검 대화", tone: "bad",
+    channel: "직접 — 진솔한 자리",
+    steps: [
+      { time: "곧", action: "회피하지 말고 관계 상태를 솔직히 점검하세요." },
+      { time: "대화에서", action: "상대의 의지를 확인하세요 (혼자 끌고 가지 않기)." },
+      { time: "결과에 따라", action: "관계 유지가 나를 해친다면 거리도 선택지입니다." },
+    ],
+  };
 }
 
 // ══════════════ 썸 — 고백 적정도 ══════════════
@@ -385,6 +497,182 @@ function personalize(d, rawText) {
   return d;
 }
 
+// ══════════════ 상대 메시지 해석 (Mock) ══════════════
+// ※ 실제 제품에서는 Claude가 문맥까지 읽어 분석한다.
+//   여기서는 키워드·문체 신호로 온도/속마음을 추정하는 데모.
+function analyzeMessage(raw) {
+  const t = (raw || "").trim();
+  let temp = 50;
+  const pos = [], neg = [];
+
+  if (t.length >= 40) { temp += 8; pos.push("답장이 길어요 — 신경 써서 쓴 흔적"); }
+  else if (t.length <= 6) { temp -= 12; neg.push("답장이 매우 짧아요 — 대화에 소극적"); }
+
+  if (/[ㅎ]{2,}|[ㅋ]{2,}|😊|🥰|❤|♥|💕|😆|ㅠ|ㅜ/.test(t)) { temp += 12; pos.push("웃음·이모티콘 — 긴장이 풀린 편안한 톤"); }
+  if (/!/.test(t)) { temp += 5; pos.push("느낌표 — 감정이 살아 있는 표현"); }
+  if (/\?/.test(t)) { temp += 10; pos.push("되물음(질문) — 대화를 이어가려는 신호"); }
+  if (/(만나|볼래|보자|언제|시간\s?돼|약속|놀자|밥|커피|영화|보고싶|보고\s?싶)/.test(t)) { temp += 14; pos.push("만남·시간 언급 — 관계 진전에 열려 있음"); }
+  if (/(그리워|좋아|고마워|미안|사랑|잘 ?지내)/.test(t)) { temp += 10; pos.push("감정·안부 표현 — 마음이 남아 있을 가능성"); }
+
+  if (/(바빠|바쁨|바빠서|나중에|다음에|글쎄|모르겠|생각\s?좀|생각해|힘들|미안한데|어렵|곤란)/.test(t)) { temp -= 16; neg.push("보류·거리두기 표현 — 지금은 신중한 태도"); }
+  if (/^(ㅇㅇ|ㅇㅋ|응|그래|어|ok|넵|네|ㅇ)\.?$/i.test(t)) { temp -= 20; neg.push("단답 — 적극적이지 않거나 감정을 아끼는 중"); }
+  if (t.length < 16 && /\.$/.test(t) && !/[?!ㅎㅋ~]/.test(t)) { temp -= 6; neg.push("마침표로 끝나는 짧은 답 — 다소 사무적인 톤"); }
+
+  temp = Math.max(6, Math.min(94, Math.round(temp)));
+  const tone = temp >= 62 ? "good" : temp >= 42 ? "warn" : "bad";
+  const label = temp >= 62 ? "따뜻한 편이에요" : temp >= 42 ? "미지근해요" : "차가운 편이에요";
+
+  // 속마음 해석
+  const reads = [];
+  if (pos.length) reads.push(...pos.map((p) => ({ kind: "pos", text: p })));
+  if (neg.length) reads.push(...neg.map((n) => ({ kind: "neg", text: n })));
+  if (!reads.length) reads.push({ kind: "neutral", text: "특별한 신호가 약해요. 톤만으로는 단정하기 어려운 중립적 메시지예요." });
+
+  // 한 줄 요약
+  let summary;
+  if (tone === "good") summary = "관심과 호의가 느껴져요. 자연스럽게 한 걸음 더 다가가도 좋아요.";
+  else if (tone === "warn") summary = "나쁘진 않지만 확신을 주는 단계는 아니에요. 부담 주지 말고 가볍게 이어가세요.";
+  else summary = "지금은 거리를 두고 싶어하는 신호가 보여요. 밀어붙이기보다 여유를 두세요.";
+
+  // 추천 답장
+  let replies;
+  if (tone === "good") replies = ["오 좋아! 그럼 이번 주 중에 시간 맞춰서 보자 :) 언제가 편해?"];
+  else if (tone === "warn") replies = ["그래 바쁜 거 알지 :) 여유 생기면 가볍게 보자~ 무리 말고!"];
+  else replies = ["응 알겠어, 편할 때 연락 줘 :)", "(지금은 답장을 서두르기보다 충분히 기다리는 편이 좋아요.)"];
+
+  return { temp, tone, label, summary, reads, replies };
+}
+
+function renderMsgReport(r) {
+  const color = r.tone === "good" ? "var(--good)" : r.tone === "warn" ? "var(--warn)" : "var(--bad)";
+  const readsHtml = r.reads.map((x) => {
+    const sign = x.kind === "pos" ? "▲" : x.kind === "neg" ? "▼" : "•";
+    return `<li class="factor-item ${x.kind === "pos" ? "pos" : x.kind === "neg" ? "neg" : ""}">
+      <span class="factor-sign">${sign}</span><span class="factor-label">${x.text}</span></li>`;
+  }).join("");
+  const repliesHtml = r.replies.map((m) => `<div class="msg-bubble">${m}</div>`).join("");
+
+  document.getElementById("msgReport").innerHTML = `
+    <div class="report-card score-card">
+      <p class="score-title">상대 메시지 온도</p>
+      <div class="temp-gauge"><div class="temp-marker" id="tempMarker" style="left:0%"></div></div>
+      <div class="temp-scale"><span>차가움</span><span>미지근</span><span>따뜻함</span></div>
+      <span class="score-badge" style="color:${color};background:${color}1a; margin-top:14px">${r.temp}°  ·  ${r.label}</span>
+      <p class="score-reason">${r.summary}</p>
+    </div>
+    <div class="report-card">
+      <p class="card-label">🔍 속마음 신호</p>
+      <ul class="factor-list">${readsHtml}</ul>
+    </div>
+    <div class="report-card msg-card">
+      <p class="card-label">💬 추천 답장</p>
+      ${repliesHtml}
+    </div>`;
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const m = document.getElementById("tempMarker");
+    if (m) m.style.left = `calc(${r.temp}% - 9px)`;
+  }));
+}
+
+function runMessageAnalysis() {
+  const input = document.getElementById("msgInput");
+  const hint = document.getElementById("msgHint");
+  const text = (input.value || "").trim();
+  if (text.length < 4) {
+    hint.textContent = "분석할 메시지를 조금 더 입력해 주세요.";
+    return;
+  }
+  hint.textContent = "";
+  renderMsgReport(analyzeMessage(text));
+  showScreen("screen-msgresult");
+}
+
+// ══════════════ 결과 이미지 공유 ══════════════
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function wrapText(ctx, text, x, y, maxW, lh) {
+  const words = text.split(" ");
+  let line = "";
+  for (const w of words) {
+    const test = line ? line + " " + w : w;
+    if (ctx.measureText(test).width > maxW && line) { ctx.fillText(line, x, y); line = w; y += lh; }
+    else line = test;
+  }
+  ctx.fillText(line, x, y);
+  return y;
+}
+
+async function shareResult() {
+  if (!lastDiag) return;
+  const d = lastDiag;
+  if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+
+  const W = 1080, H = 1350;
+  const canvas = document.createElement("canvas");
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  // 배경
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, "#fdeef1"); bg.addColorStop(1, "#f1edfc");
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  // 카드
+  ctx.fillStyle = "#ffffff"; roundRect(ctx, 80, 130, 920, 1090, 48); ctx.fill();
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#2a2438"; ctx.font = '700 52px "Noto Sans KR", sans-serif';
+  ctx.fillText("Pacemaker 💘", W / 2, 280);
+  ctx.fillStyle = "#8a8398"; ctx.font = '500 30px "Noto Sans KR", sans-serif';
+  ctx.fillText("AI 연애 컨설팅", W / 2, 330);
+
+  ctx.fillStyle = "#8a8398"; ctx.font = '700 36px "Noto Sans KR", sans-serif';
+  ctx.fillText(d.scoreTitle, W / 2, 470);
+
+  // 점수 링
+  const color = d.score >= 65 ? "#2fa66b" : d.score >= 45 ? "#e0902f" : "#d65b58";
+  const cx = W / 2, cy = 660, rad = 140;
+  ctx.lineWidth = 36; ctx.lineCap = "round";
+  ctx.strokeStyle = "#efe6e0";
+  ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = color;
+  ctx.beginPath(); ctx.arc(cx, cy, rad, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (d.score / 100)); ctx.stroke();
+  ctx.fillStyle = color; ctx.font = '700 130px "Noto Sans KR", sans-serif';
+  ctx.fillText(d.score, cx, cy + 30);
+  ctx.fillStyle = "#8a8398"; ctx.font = '500 34px "Noto Sans KR", sans-serif';
+  ctx.fillText("/ 100", cx, cy + 90);
+
+  // 언제·어떻게 헤드라인
+  ctx.fillStyle = "#c2455f"; ctx.font = '700 30px "Noto Sans KR", sans-serif';
+  ctx.fillText("📅 언제·어떻게", cx, 930);
+  ctx.fillStyle = color; ctx.font = '700 44px "Noto Sans KR", sans-serif';
+  wrapText(ctx, d.plan.when, cx, 1000, 800, 56);
+
+  // 푸터
+  ctx.fillStyle = "#b8b0c2"; ctx.font = '500 28px "Noto Sans KR", sans-serif';
+  ctx.fillText("내 연애 타이밍, 지금 진단받기", cx, 1160);
+
+  const finish = (blob) => {
+    const file = new File([blob], "pacemaker-result.png", { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: "Pacemaker 진단 결과", text: "내 연애 타이밍 진단 결과 💘" }).catch(() => {});
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "pacemaker-result.png"; a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+  canvas.toBlob(finish, "image/png");
+}
+
 // ── 화면 전환 ─────────────────────────────────
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("is-active"));
@@ -476,6 +764,7 @@ function runAnalysis() {
 
 // ── 리포트 렌더링 ─────────────────────────────
 function renderReport(d) {
+  lastDiag = d;
   const color = d.score >= 65 ? "var(--good)" : d.score >= 45 ? "var(--warn)" : "var(--bad)";
   const badge = d.score >= 65 ? "지금이 좋은 타이밍" : d.score >= 45 ? "조금 더 준비가 필요" : "지금은 기다릴 때";
   const C = 2 * Math.PI * 52;
@@ -505,6 +794,23 @@ function renderReport(d) {
   const msgHtml = d.hold
     ? `<div class="msg-hold">${d.hold}</div>`
     : `<div class="msg-bubble">${d.msg}</div>`;
+
+  // 언제·어떻게 연락 플랜
+  const p = d.plan;
+  const planColor = p.tone === "good" ? "var(--good)" : p.tone === "warn" ? "var(--warn)" : "var(--bad)";
+  const planHtml = `
+    <div class="report-card plan-card">
+      <p class="card-label">📅 언제·어떻게 연락할까</p>
+      <div class="plan-when" style="color:${planColor};background:${planColor}14">${p.when}</div>
+      <div class="plan-channel"><span>추천 수단</span>${p.channel}</div>
+      <ul class="plan-steps">
+        ${p.steps.map((s) => `
+          <li class="plan-step">
+            <span class="plan-time">${s.time}</span>
+            <span class="plan-action">${s.action}</span>
+          </li>`).join("")}
+      </ul>
+    </div>`;
 
   // AI 개인화 카드 (자유서술 반영)
   const aiHtml = d.aiApplied
@@ -538,6 +844,8 @@ function renderReport(d) {
       <span class="score-badge" style="color:${color};background:${color}1a">${badge}</span>
       <p class="score-reason">${d.reason}</p>
     </div>
+
+    ${planHtml}
 
     ${aiHtml}
 
@@ -580,6 +888,13 @@ document.addEventListener("click", (e) => {
   if (action === "start") showScreen("screen-stage");
   else if (action === "home") { reset(); showScreen("screen-landing"); }
   else if (action === "restart") { reset(); showScreen("screen-stage"); }
+  else if (action === "message") {
+    showScreen("screen-message");
+    const hint = document.getElementById("msgHint");
+    if (hint) hint.textContent = "";
+  }
+  else if (action === "analyzeMsg") runMessageAnalysis();
+  else if (action === "share") shareResult();
   else if (action === "prev") {
     if (state.qIndex > 0) { state.qIndex--; renderQuestion(); }
   } else if (stageBtn) {
