@@ -7,9 +7,15 @@
 - 심리적 안전감을 주는 색·여백
 - 모바일 우선
 
+## 타이포그래피 (결정)
+- **본문/UI: Pretendard** (Variable, CDN) — 한국 프리미엄 앱의 표준. 신뢰감 있고 모바일 가독성 우수.
+  - fallback: `-apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR"`
+- 대안: 제목만 명조(나눔명조)로 감성 강조 / Gowun Dodum(부드러움) / IBM Plex Sans KR(테크)
+- 비교 페이지: `font-preview.html`
+
 ## 정의할 항목
 - [ ] 컬러 팔레트 (primary / 강조 / 중립)
-- [ ] 타이포그래피 (한글 본문 가독성 우선)
+- [x] 타이포그래피 — Pretendard 적용
 - [ ] 컴포넌트 (버튼, 카드, 설문 입력, 진단 리포트)
 - [ ] 아이콘·일러스트 톤
 - [ ] 모션 (분석 대기 화면 등)

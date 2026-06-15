@@ -679,12 +679,12 @@ async function shareResult() {
   ctx.fillStyle = "#ffffff"; roundRect(ctx, 80, 130, 920, 1090, 48); ctx.fill();
 
   ctx.textAlign = "center";
-  ctx.fillStyle = "#2a2438"; ctx.font = '700 52px "Noto Sans KR", sans-serif';
+  ctx.fillStyle = "#2a2438"; ctx.font = '700 52px Pretendard, "Noto Sans KR", sans-serif';
   ctx.fillText("Pacemaker", W / 2, 280);
-  ctx.fillStyle = "#8a8398"; ctx.font = '500 30px "Noto Sans KR", sans-serif';
+  ctx.fillStyle = "#8a8398"; ctx.font = '500 30px Pretendard, "Noto Sans KR", sans-serif';
   ctx.fillText("AI 연애 컨설팅", W / 2, 330);
 
-  ctx.fillStyle = "#8a8398"; ctx.font = '700 36px "Noto Sans KR", sans-serif';
+  ctx.fillStyle = "#8a8398"; ctx.font = '700 36px Pretendard, "Noto Sans KR", sans-serif';
   ctx.fillText(d.scoreTitle, W / 2, 470);
 
   // 점수 링
@@ -695,19 +695,19 @@ async function shareResult() {
   ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.stroke();
   ctx.strokeStyle = color;
   ctx.beginPath(); ctx.arc(cx, cy, rad, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (d.score / 100)); ctx.stroke();
-  ctx.fillStyle = color; ctx.font = '700 130px "Noto Sans KR", sans-serif';
+  ctx.fillStyle = color; ctx.font = '700 130px Pretendard, "Noto Sans KR", sans-serif';
   ctx.fillText(d.score, cx, cy + 30);
-  ctx.fillStyle = "#8a8398"; ctx.font = '500 34px "Noto Sans KR", sans-serif';
+  ctx.fillStyle = "#8a8398"; ctx.font = '500 34px Pretendard, "Noto Sans KR", sans-serif';
   ctx.fillText("/ 100", cx, cy + 90);
 
   // 언제·어떻게 헤드라인
-  ctx.fillStyle = "#c2455f"; ctx.font = '700 30px "Noto Sans KR", sans-serif';
+  ctx.fillStyle = "#c2455f"; ctx.font = '700 30px Pretendard, "Noto Sans KR", sans-serif';
   ctx.fillText("언제·어떻게", cx, 930);
-  ctx.fillStyle = color; ctx.font = '700 44px "Noto Sans KR", sans-serif';
+  ctx.fillStyle = color; ctx.font = '700 44px Pretendard, "Noto Sans KR", sans-serif';
   wrapText(ctx, d.plan.when, cx, 1000, 800, 56);
 
   // 푸터
-  ctx.fillStyle = "#b8b0c2"; ctx.font = '500 28px "Noto Sans KR", sans-serif';
+  ctx.fillStyle = "#b8b0c2"; ctx.font = '500 28px Pretendard, "Noto Sans KR", sans-serif';
   ctx.fillText("내 연애 타이밍, 지금 진단받기", cx, 1160);
 
   const finish = (blob) => {

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pacemaker — 글꼴 비교</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@400;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+  <style>
+    :root{
+      --bg:#fbf6f3; --surface:#fff; --text:#2a2438; --muted:#8a8398;
+      --line:#efe6e0; --primary:#e0607d; --primary-dark:#c2455f; --good:#2fa66b;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);padding:28px 16px 60px;
+      font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;line-height:1.5}
+    .head{max-width:960px;margin:0 auto 28px}
+    .head h1{font-size:26px;letter-spacing:-.5px;margin-bottom:8px}
+    .head p{color:var(--muted);font-size:15px}
+    .grid{max-width:960px;margin:0 auto;display:grid;gap:20px;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;
+      padding:22px;box-shadow:0 10px 30px rgba(80,40,60,.06);position:relative}
+    .badge{position:absolute;top:-10px;right:16px;background:var(--good);color:#fff;
+      font-size:11px;font-weight:700;padding:4px 12px;border-radius:99px}
+    .fname{font-size:13px;font-weight:700;color:var(--primary-dark);margin-bottom:2px}
+    .ftag{font-size:12px;color:var(--muted);margin-bottom:18px}
+    .sample{border-top:1px dashed var(--line);padding-top:16px}
+    .s-logo{font-size:20px;font-weight:700;letter-spacing:-.3px}
+    .s-title{font-size:21px;font-weight:700;line-height:1.35;letter-spacing:-.4px;margin:10px 0}
+    .s-title b{color:var(--primary)}
+    .s-score{display:flex;align-items:baseline;gap:6px;margin:8px 0}
+    .s-score .n{font-size:40px;font-weight:700;color:var(--good);line-height:1}
+    .s-score .u{font-size:14px;color:var(--muted)}
+    .s-score .t{font-size:13px;color:var(--muted);margin-left:auto;align-self:center}
+    .s-label{font-size:13px;font-weight:700;color:var(--primary-dark);margin:14px 0 6px}
+    .s-body{font-size:14px;color:var(--text)}
+    .s-bubble{background:#fef7f8;border:1px solid var(--line);border-radius:12px 12px 12px 4px;
+      padding:12px 14px;font-size:14px;margin:12px 0}
+    .s-btn{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;
+      border:none;border-radius:12px;padding:11px;width:100%;font-weight:700;font-size:14px;font-family:inherit}
+    .pros{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.6}
+    .pros b{color:var(--text)}
+
+    /* 폰트 적용 */
+    .f-pretendard{font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif}
+    .f-noto{font-family:"Noto Sans KR",sans-serif}
+    .f-gowun{font-family:"Gowun Dodum",sans-serif}
+    .f-plex{font-family:"IBM Plex Sans KR",sans-serif}
+    .f-pair .s-logo,.f-pair .s-title{font-family:"Nanum Myeongjo",serif}
+    .f-pair .sample :not(.s-logo):not(.s-title){font-family:"Pretendard Variable",Pretendard,sans-serif}
+  </style>
+</head>
+<body>
+  <div class="head">
+    <h1>Pacemaker 글꼴 비교</h1>
+    <p>같은 화면 텍스트를 5가지 글꼴로 렌더링했습니다. 마음에 드는 걸 알려주시면 프로토타입에 적용합니다.</p>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const FONTS = [
+      { cls:"f-pretendard", name:"Pretendard", tag:"모던 산세리프 · CDN", rec:true,
+        pros:"한국 프리미엄 앱의 사실상 <b>표준</b>. 깔끔하고 신뢰감 있으며 작은 크기에서도 또렷해 <b>모바일 가독성 최고</b>. 추천." },
+      { cls:"f-pair", name:"Pretendard + 나눔명조 헤딩", tag:"본문 산세리프 + 제목 세리프", rec:false,
+        pros:"본문은 깔끔하게, 제목만 <b>명조(세리프)</b>로. 연애 주제에 어울리는 <b>감성·프리미엄</b> 무드." },
+      { cls:"f-gowun", name:"Gowun Dodum", tag:"부드러운 고딕 · Google", rec:false,
+        pros:"둥글고 <b>다정·편안한</b> 느낌. 단, 한 굵기뿐이라 위계 표현이 약하고 데이터/숫자엔 다소 가벼움." },
+      { cls:"f-plex", name:"IBM Plex Sans KR", tag:"테크 산세리프 · Google", rec:false,
+        pros:"또렷하고 약간 <b>테크·전문</b>적인 인상. 신뢰·분석 이미지를 강조하고 싶을 때." },
+      { cls:"f-noto", name:"Noto Sans KR (현재)", tag:"기본 고딕 · Google", rec:false,
+        pros:"무난하고 안전하지만 <b>개성이 약하고 흔함</b>. 현재 적용된 글꼴." },
+    ];
+    document.getElementById("grid").innerHTML = FONTS.map(f => `
+      <div class="card ${f.cls}">
+        ${f.rec ? '<span class="badge">추천</span>' : ''}
+        <div class="fname" style="font-family:inherit">${f.name}</div>
+        <div class="ftag">${f.tag}</div>
+        <div class="sample">
+          <div class="s-logo">Pacemaker</div>
+          <div class="s-title">연애의 결정적 순간,<br><b>타이밍</b>을 분석해 드립니다</div>
+          <div class="s-score"><span class="n">72</span><span class="u">/ 100</span><span class="t">재회 시도 적정도</span></div>
+          <div class="s-label">언제·어떻게 연락할까</div>
+          <div class="s-body">충분한 시간이 흘렀고 회복 가능한 상황이에요. 가벼운 안부로 시작하세요.</div>
+          <div class="s-bubble">잘 지내지? 지나가다 문득 생각나서 연락해 봤어.</div>
+          <button class="s-btn">AI 진단 받기</button>
+        </div>
+        <p class="pros">${f.pros}</p>
+      </div>`).join("");
+  </script>
+</body>
+</html>
