@@ -1,7 +1,7 @@
-# 데이터 모델
+# 데이터 모델 (참고용 정규화 모델)
 
-> 단일 진실(source of truth)은 [`web/prisma/schema.prisma`](../../web/prisma/schema.prisma).
-> 이 문서는 그 설계 의도를 설명한다.
+> ⚠️ **실제 백엔드/DB는 [../backend/schema.md](../backend/schema.md)** 가 단일 진실입니다 (Supabase).
+> 이 문서는 향후 정규화(cases/feedback 등) 방향을 위한 참고 모델입니다.
 
 ## 엔티티 관계
 ```

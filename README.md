@@ -14,8 +14,13 @@
 > 소스 수정 후 다시 만들려면: `node prototype/build.js`
 > (개발 중 분리된 버전으로 보려면 `prototype/index.html`)
 
+## 라이브
+- 🌐 https://pacemaker-six-eta.vercel.app (Vercel)
+
 ## 문서
 - [제품 기획서 (PRD)](docs/PRD.md)
+- [기능 명세 (Functional Spec)](docs/functional-spec/README.md) — 페이지별 spec + [flow](docs/functional-spec/flow.md)
+- [백엔드 · DB 스키마](docs/backend/schema.md)
 
 ## 개발 로드맵
 1. ✅ 기획 (PRD)
