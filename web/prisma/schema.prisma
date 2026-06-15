@@ -1,0 +1,122 @@
+// Pacemaker DB 스키마 (초안 v0.1)
+// 데이터 모델 설명: ../../docs/data/schema.md
+//
+// 실제 사용 전 `web/`에서 Next.js + Prisma 초기화 필요:
+//   npx prisma init
+//   npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // 개발: SQLite, 운영: PostgreSQL 로 전환 예정
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// 사용자
+// ─────────────────────────────────────────────
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique // 익명 사용 허용 → optional
+  ageRange  String? // "20-24", "25-29" 등
+  gender    String? // 선택 입력
+  createdAt DateTime @default(now())
+
+  profile Profile?
+  cases   Case[]
+}
+
+// 사용자 성향 프로필 (간이 진단 결과)
+model Profile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attachmentType String? // "secure" | "anxious" | "avoidant"
+  loveValues     String? // 연애 가치관 태그 (JSON 문자열)
+  conflictStyle  String? // 갈등 대응 방식
+}
+
+// ─────────────────────────────────────────────
+// 케이스 (한 건의 연애 고민)
+// ─────────────────────────────────────────────
+model Case {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 관계 단계: "crush"(썸) | "dating"(연애중) | "breakup"(이별후)
+  stage         String
+
+  // 핵심 사실
+  durationDays  Int? // 만난/사귄 기간(일)
+  lastContactAt DateTime? // 마지막 연락 시점
+  breakupReason String? // 이별 사유 (stage=breakup일 때)
+  contactTrend  String? // 연락 추세: "increasing" | "stable" | "decreasing" | "none"
+
+  // 상대 성향 (추정)
+  partnerAttachment String? // 추정 애착 유형
+  partnerTags       String? // 특징 태그 (JSON 문자열)
+
+  // 자유 서술 (사용자가 입력한 맥락)
+  context String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  diagnoses Diagnosis[]
+  events    Event[]
+}
+
+// ─────────────────────────────────────────────
+// 진단 (AI 컨설팅 결과)
+// ─────────────────────────────────────────────
+model Diagnosis {
+  id     String @id @default(cuid())
+  caseId String
+  case   Case   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  // 타이밍 신호
+  timingScore Int // 0-100 현 시점 행동 적정도
+  timingLabel String // "now" | "wait_n_days" | "hold"
+  timingReason String // 한 줄 근거
+
+  // 구조화 출력 (JSON 문자열로 저장)
+  actions          String // [{priority, content, reason}]
+  risks            String // [경고 메시지]
+  generatedMessage String? // 추천 연락 문구 초안
+
+  // 메타 (재현·품질 추적용)
+  model      String? // 사용한 LLM 모델 id
+  promptVer  String? // 프롬프트 버전
+  createdAt  DateTime @default(now())
+
+  feedback Feedback?
+}
+
+// ─────────────────────────────────────────────
+// 이벤트 (케이스 타임라인 — v2: 진행 추적)
+// ─────────────────────────────────────────────
+model Event {
+  id        String   @id @default(cuid())
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  type      String // "contacted" | "met" | "partner_replied" | "note" 등
+  note      String?
+  occurredAt DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────
+// 피드백 (결과 데이터 플라이휠 — 추천 품질 개선)
+// ─────────────────────────────────────────────
+model Feedback {
+  id          String   @id @default(cuid())
+  diagnosisId String   @unique
+  diagnosis   Diagnosis @relation(fields: [diagnosisId], references: [id], onDelete: Cascade)
+  followed    Boolean? // 추천을 따랐는지
+  outcome     String? // "positive" | "neutral" | "negative"
+  note        String?
+  createdAt   DateTime @default(now())
+}
