@@ -33,8 +33,8 @@ export default function UpdatePasswordPage() {
     const { error } = await supabase.auth.updateUser({ password: pw });
     setLoading(false);
     if (error) return setErr(error.message);
-    setOk("비밀번호가 변경됐어요. 잠시 후 홈으로 이동합니다.");
-    setTimeout(() => router.push("/home"), 1200);
+    setOk("비밀번호가 변경됐어요. 잠시 후 이동합니다.");
+    setTimeout(() => router.push("/diagnose"), 1200);
   }
 
   if (ready === false) {

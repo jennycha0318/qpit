@@ -108,9 +108,9 @@ export default function DiagnosePage() {
 
         <Report d={result} />
         <button className="btn btn-ghost mt-5" onClick={reset}>다시 진단하기</button>
-        {saveStatus === "guest"
-          ? <Link href="/" className="btn btn-ghost mt-3 block text-center">처음으로</Link>
-          : <Link href="/home" className="btn btn-ghost mt-3 block text-center">홈으로</Link>}
+        {saveStatus === "guest" && (
+          <Link href="/" className="btn btn-ghost mt-3 block text-center">처음으로</Link>
+        )}
       </div>
     );
   }

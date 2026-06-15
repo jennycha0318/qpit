@@ -28,7 +28,6 @@ export default async function HistoryDetailPage({
       <div className="mt-3">
         <Report d={d} />
       </div>
-      <Link href="/home" className="btn btn-ghost mt-5 block text-center">홈으로</Link>
     </div>
   );
 }

@@ -20,7 +20,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
     setLoading(false);
     if (error) setErr("이메일 또는 비밀번호가 올바르지 않아요.");
-    else router.push("/home");
+    else router.push("/diagnose");
   }
 
   return (

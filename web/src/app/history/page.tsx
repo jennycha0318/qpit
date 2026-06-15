@@ -29,8 +29,7 @@ export default async function HistoryPage() {
 
   return (
     <div>
-      <Link href="/home" className="text-sm text-muted">← 홈</Link>
-      <h2 className="mb-1.5 mt-2 text-[23px] font-bold tracking-tight">진단 히스토리</h2>
+      <h2 className="mb-1.5 text-[23px] font-bold tracking-tight">진단 히스토리</h2>
       <p className="mb-5 text-sm text-muted">지난 진단 결과를 다시 볼 수 있어요.</p>
 
       {rows.length === 0 ? (

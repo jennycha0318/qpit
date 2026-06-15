@@ -9,7 +9,7 @@ export default async function LandingPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (user) redirect("/home");
+  if (user) redirect("/diagnose");
 
   return (
     <div className="pt-6">

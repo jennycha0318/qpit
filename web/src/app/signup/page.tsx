@@ -29,7 +29,7 @@ export default function SignupPage() {
     setLoading(false);
     if (error) return setErr(error.message);
     // 이메일 인증이 꺼져 있으면 즉시 세션 생성됨
-    if (data.session) router.push("/home");
+    if (data.session) router.push("/diagnose");
     else setOk("가입 확인 메일을 보냈어요. 메일의 링크를 눌러 인증을 완료해 주세요.");
   }
 

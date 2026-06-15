@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { TabBar } from "@/components/TabBar";
 
 export const metadata: Metadata = {
   title: "Pacemaker — AI 연애 컨설팅",
@@ -16,7 +17,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <div className="mx-auto min-h-screen max-w-app px-5 py-6">{children}</div>
+        <div className="mx-auto min-h-screen max-w-app px-5 pb-24 pt-6">{children}</div>
+        <TabBar />
       </body>
     </html>
   );

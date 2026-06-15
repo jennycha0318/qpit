@@ -25,8 +25,7 @@ export default async function ProfilePage() {
 
   return (
     <div>
-      <Link href="/home" className="text-sm text-muted">← 홈</Link>
-      <h2 className="mb-4 mt-2 text-[23px] font-bold tracking-tight">내 프로필</h2>
+      <h2 className="mb-4 text-[23px] font-bold tracking-tight">내 프로필</h2>
       <div className="card">
         <Row k="이름" v={name} />
         <Row k="이메일" v={user?.email ?? "-"} />
