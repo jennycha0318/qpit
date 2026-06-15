@@ -7,7 +7,10 @@
 
 // ── 상태 ──────────────────────────────────────
 const state = { stage: null, qIndex: 0, answers: {} };
-let lastDiag = null; // 공유용 마지막 진단 결과
+let lastDiag = null;          // 공유용 마지막 진단 결과
+let msgImageData = null;      // 업로드된 카톡 캡처(dataURL)
+const screenHistory = [];     // 뒤로가기용 화면 스택
+const TRANSIENT = new Set(["screen-analyzing"]); // 히스토리에 안 남길 화면
 
 // ── 공통 질문 (상대 성향 + 나의 성향/심리) ─────
 const PARTNER_Q = {
@@ -317,7 +320,7 @@ function diagnoseCrush(a) {
     ];
     res.risks = ["조급한 고백은 관계를 어색하게 만들 수 있어요.", "혼자 확신을 키우는 ‘과대 해석’을 경계하세요."];
     res.msgLabel = "만남 제안 예시";
-    res.msg = "지난번에 가보고 싶다던 그 카페 있잖아.\n이번 주말에 같이 갈래? 가서 더 얘기하자 :)";
+    res.msg = "지난번에 가보고 싶다던 그 카페 있잖아.\n이번 주말에 같이 갈래? 가서 더 얘기하자";
   } else {
     res.reason = "지금은 고백 타이밍이 아니에요. 상대 신호가 약하거나 정보가 부족합니다. 무리한 고백은 관계 자체를 잃게 할 수 있어요.";
     res.actions = [
@@ -358,7 +361,7 @@ function diagnoseDating(a) {
     ];
     res.risks = ["불안을 자주 ‘확인 질문’으로 풀면 상대가 지칠 수 있어요."];
     res.msgLabel = "마음 표현 예시";
-    res.msg = "요즘 바빠서 자주 못 봤는데 그래도 네 생각 많이 했어.\n이번 주에 짧게라도 얼굴 보자. 보고 싶어서 :)";
+    res.msg = "요즘 바빠서 자주 못 봤는데 그래도 네 생각 많이 했어.\n이번 주에 짧게라도 얼굴 보자. 보고 싶어서";
   } else if (score >= 45) {
     res.reason = "약한 경고 신호가 있어요. 방치하면 거리감이 굳어집니다. 지금이 대화로 풀 적기예요.";
     res.actions = [
@@ -536,23 +539,43 @@ function analyzeMessage(raw) {
 
   // 추천 답장
   let replies;
-  if (tone === "good") replies = ["오 좋아! 그럼 이번 주 중에 시간 맞춰서 보자 :) 언제가 편해?"];
-  else if (tone === "warn") replies = ["그래 바쁜 거 알지 :) 여유 생기면 가볍게 보자~ 무리 말고!"];
-  else replies = ["응 알겠어, 편할 때 연락 줘 :)", "(지금은 답장을 서두르기보다 충분히 기다리는 편이 좋아요.)"];
+  if (tone === "good") replies = ["오 좋아. 그럼 이번 주 중에 시간 맞춰서 보자. 언제가 편해?"];
+  else if (tone === "warn") replies = ["그래, 바쁜 거 알지. 여유 생기면 가볍게 보자. 무리하지 말고."];
+  else replies = ["응 알겠어, 편할 때 연락 줘", "(지금은 답장을 서두르기보다 충분히 기다리는 편이 좋아요.)"];
 
   return { temp, tone, label, summary, reads, replies };
 }
 
-function renderMsgReport(r) {
+// 캡처만 올린 경우의 데모용 결과 (실제 제품은 Claude Vision이 읽음)
+function demoImageResult() {
+  return {
+    temp: 55, tone: "warn", label: "데모",
+    summary: "캡처를 첨부해 주셨어요. 데모 버전에서는 이미지 속 대화를 직접 읽지 못해 예시 결과만 보여드립니다.",
+    reads: [{ kind: "neutral", text: "실제 서비스에서는 Claude가 캡처 속 대화 내용·말투·답장 간격까지 읽어 온도와 속마음을 분석합니다." }],
+    replies: ["(캡처 자동 분석은 실제 서비스에서 제공됩니다.)"],
+    demo: true,
+  };
+}
+
+function renderMsgReport(r, imageData) {
   const color = r.tone === "good" ? "var(--good)" : r.tone === "warn" ? "var(--warn)" : "var(--bad)";
   const readsHtml = r.reads.map((x) => {
-    const sign = x.kind === "pos" ? "▲" : x.kind === "neg" ? "▼" : "•";
+    const sign = x.kind === "pos" ? "▲" : x.kind === "neg" ? "▼" : "·";
     return `<li class="factor-item ${x.kind === "pos" ? "pos" : x.kind === "neg" ? "neg" : ""}">
       <span class="factor-sign">${sign}</span><span class="factor-label">${x.text}</span></li>`;
   }).join("");
   const repliesHtml = r.replies.map((m) => `<div class="msg-bubble">${m}</div>`).join("");
 
+  const imageHtml = imageData
+    ? `<div class="report-card">
+        <p class="card-label">첨부한 캡처</p>
+        <img class="msg-shot" src="${imageData}" alt="첨부한 카톡 캡처" />
+        <p class="ai-foot">실제 서비스에서는 Claude가 이 캡처를 직접 읽고 분석합니다.</p>
+      </div>`
+    : "";
+
   document.getElementById("msgReport").innerHTML = `
+    ${imageHtml}
     <div class="report-card score-card">
       <p class="score-title">상대 메시지 온도</p>
       <div class="temp-gauge"><div class="temp-marker" id="tempMarker" style="left:0%"></div></div>
@@ -561,11 +584,11 @@ function renderMsgReport(r) {
       <p class="score-reason">${r.summary}</p>
     </div>
     <div class="report-card">
-      <p class="card-label">🔍 속마음 신호</p>
+      <p class="card-label">속마음 신호</p>
       <ul class="factor-list">${readsHtml}</ul>
     </div>
     <div class="report-card msg-card">
-      <p class="card-label">💬 추천 답장</p>
+      <p class="card-label">추천 답장</p>
       ${repliesHtml}
     </div>`;
 
@@ -579,13 +602,41 @@ function runMessageAnalysis() {
   const input = document.getElementById("msgInput");
   const hint = document.getElementById("msgHint");
   const text = (input.value || "").trim();
-  if (text.length < 4) {
-    hint.textContent = "분석할 메시지를 조금 더 입력해 주세요.";
+  if (text.length < 4 && !msgImageData) {
+    hint.textContent = "메시지를 입력하거나 카톡 캡처를 올려주세요.";
     return;
   }
   hint.textContent = "";
-  renderMsgReport(analyzeMessage(text));
+  const r = text.length >= 4 ? analyzeMessage(text) : demoImageResult();
+  renderMsgReport(r, msgImageData);
   showScreen("screen-msgresult");
+}
+
+// ── 캡처 이미지 업로드 ────────────────────────
+function handleImageFile(file) {
+  if (!file || !file.type.startsWith("image/")) return;
+  const reader = new FileReader();
+  reader.onload = (e) => { msgImageData = e.target.result; renderImagePreview(); };
+  reader.readAsDataURL(file);
+}
+function renderImagePreview() {
+  const prompt = document.getElementById("uploadPrompt");
+  const preview = document.getElementById("uploadPreview");
+  const img = document.getElementById("msgImagePreview");
+  if (!prompt || !preview) return;
+  if (msgImageData) {
+    img.src = msgImageData;
+    prompt.hidden = true; preview.hidden = false;
+  } else {
+    prompt.hidden = false; preview.hidden = true; img.removeAttribute("src");
+  }
+}
+function resetMessageInput() {
+  msgImageData = null;
+  const ta = document.getElementById("msgInput"); if (ta) ta.value = "";
+  const hint = document.getElementById("msgHint"); if (hint) hint.textContent = "";
+  const fi = document.getElementById("msgImageInput"); if (fi) fi.value = "";
+  renderImagePreview();
 }
 
 // ══════════════ 결과 이미지 공유 ══════════════
@@ -629,7 +680,7 @@ async function shareResult() {
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#2a2438"; ctx.font = '700 52px "Noto Sans KR", sans-serif';
-  ctx.fillText("Pacemaker 💘", W / 2, 280);
+  ctx.fillText("Pacemaker", W / 2, 280);
   ctx.fillStyle = "#8a8398"; ctx.font = '500 30px "Noto Sans KR", sans-serif';
   ctx.fillText("AI 연애 컨설팅", W / 2, 330);
 
@@ -651,7 +702,7 @@ async function shareResult() {
 
   // 언제·어떻게 헤드라인
   ctx.fillStyle = "#c2455f"; ctx.font = '700 30px "Noto Sans KR", sans-serif';
-  ctx.fillText("📅 언제·어떻게", cx, 930);
+  ctx.fillText("언제·어떻게", cx, 930);
   ctx.fillStyle = color; ctx.font = '700 44px "Noto Sans KR", sans-serif';
   wrapText(ctx, d.plan.when, cx, 1000, 800, 56);
 
@@ -662,7 +713,7 @@ async function shareResult() {
   const finish = (blob) => {
     const file = new File([blob], "pacemaker-result.png", { type: "image/png" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: "Pacemaker 진단 결과", text: "내 연애 타이밍 진단 결과 💘" }).catch(() => {});
+      navigator.share({ files: [file], title: "Pacemaker 진단 결과", text: "내 연애 타이밍 진단 결과" }).catch(() => {});
     } else {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -673,11 +724,28 @@ async function shareResult() {
   canvas.toBlob(finish, "image/png");
 }
 
-// ── 화면 전환 ─────────────────────────────────
-function showScreen(id) {
+// ── 화면 전환 + 뒤로가기 ──────────────────────
+function showScreen(id, isBack) {
+  const cur = document.querySelector(".screen.is-active")?.id;
+  if (!isBack && cur && cur !== id && !TRANSIENT.has(cur)) screenHistory.push(cur);
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("is-active"));
   document.getElementById(id).classList.add("is-active");
+  const back = document.getElementById("backBtn");
+  if (back) back.style.visibility =
+    (id === "screen-landing" || id === "screen-analyzing") ? "hidden" : "visible";
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function goBack() {
+  const cur = document.querySelector(".screen.is-active")?.id;
+  // 설문 진행 중이면 이전 질문으로
+  if (cur === "screen-survey" && state.qIndex > 0) {
+    state.qIndex--;
+    renderQuestion();
+    return;
+  }
+  const prev = screenHistory.pop();
+  showScreen(prev || "screen-landing", true);
 }
 
 // ── 설문 렌더링 ───────────────────────────────
@@ -689,7 +757,6 @@ function renderQuestion() {
   document.getElementById("progressBar").style.width = `${(state.qIndex / total) * 100}%`;
   document.getElementById("qCount").textContent = `질문 ${state.qIndex + 1} / ${total}`;
   document.getElementById("qTitle").textContent = q.title;
-  document.getElementById("btnPrev").style.visibility = state.qIndex === 0 ? "hidden" : "visible";
 
   const box = document.getElementById("qOptions");
   box.innerHTML = "";
@@ -699,7 +766,7 @@ function renderQuestion() {
     box.innerHTML = `
       <p class="q-desc">${q.desc || ""}</p>
       <textarea id="freeText" class="q-textarea" placeholder="${q.placeholder || ""}">${state.answers.freeText || ""}</textarea>
-      <button class="btn btn-primary" id="btnFinish">✨ AI 진단 받기</button>
+      <button class="btn btn-primary" id="btnFinish">AI 진단 받기</button>
       <button class="btn btn-ghost" id="btnSkip">건너뛰고 진단하기</button>`;
     box.querySelector("#btnFinish").onclick = () => {
       state.answers.freeText = box.querySelector("#freeText").value;
@@ -800,7 +867,7 @@ function renderReport(d) {
   const planColor = p.tone === "good" ? "var(--good)" : p.tone === "warn" ? "var(--warn)" : "var(--bad)";
   const planHtml = `
     <div class="report-card plan-card">
-      <p class="card-label">📅 언제·어떻게 연락할까</p>
+      <p class="card-label">언제·어떻게 연락할까</p>
       <div class="plan-when" style="color:${planColor};background:${planColor}14">${p.when}</div>
       <div class="plan-channel"><span>추천 수단</span>${p.channel}</div>
       <ul class="plan-steps">
@@ -815,7 +882,7 @@ function renderReport(d) {
   // AI 개인화 카드 (자유서술 반영)
   const aiHtml = d.aiApplied
     ? `<div class="report-card ai-card">
-        <p class="card-label ai-label">✨ AI가 당신의 상황을 추가로 반영했어요</p>
+        <p class="card-label ai-label">AI가 당신의 상황을 추가로 반영했어요</p>
         <ul class="ai-list">
           ${d.aiConsiderations.map((c) => `
             <li class="ai-item">
@@ -850,22 +917,22 @@ function renderReport(d) {
     ${aiHtml}
 
     <div class="report-card">
-      <p class="card-label">🔍 이렇게 판단했어요</p>
+      <p class="card-label">이렇게 판단했어요</p>
       <ul class="factor-list">${factorsHtml}</ul>
     </div>
 
     <div class="report-card">
-      <p class="card-label">🧭 추천 액션</p>
+      <p class="card-label">추천 액션</p>
       <ul class="action-list">${actionsHtml}</ul>
     </div>
 
     <div class="report-card">
-      <p class="card-label">⚠️ 이것만은 주의하세요</p>
+      <p class="card-label">이것만은 주의하세요</p>
       <ul class="risk-list">${risksHtml}</ul>
     </div>
 
     <div class="report-card msg-card">
-      <p class="card-label">💬 ${d.msgLabel}</p>
+      <p class="card-label">${d.msgLabel}</p>
       ${msgHtml}
     </div>
   `;
@@ -886,22 +953,28 @@ document.addEventListener("click", (e) => {
   const stageBtn = e.target.closest("[data-stage]");
 
   if (action === "start") showScreen("screen-stage");
-  else if (action === "home") { reset(); showScreen("screen-landing"); }
-  else if (action === "restart") { reset(); showScreen("screen-stage"); }
-  else if (action === "message") {
-    showScreen("screen-message");
-    const hint = document.getElementById("msgHint");
-    if (hint) hint.textContent = "";
-  }
+  else if (action === "back") goBack();
+  else if (action === "home") { reset(); screenHistory.length = 0; showScreen("screen-landing", true); }
+  else if (action === "restart") { reset(); screenHistory.length = 0; showScreen("screen-stage", true); }
+  else if (action === "message") { resetMessageInput(); showScreen("screen-message"); }
   else if (action === "analyzeMsg") runMessageAnalysis();
+  else if (action === "pickImage") document.getElementById("msgImageInput")?.click();
+  else if (action === "removeImage") {
+    msgImageData = null;
+    const fi = document.getElementById("msgImageInput"); if (fi) fi.value = "";
+    renderImagePreview();
+  }
   else if (action === "share") shareResult();
-  else if (action === "prev") {
-    if (state.qIndex > 0) { state.qIndex--; renderQuestion(); }
-  } else if (stageBtn) {
+  else if (stageBtn) {
     state.stage = stageBtn.dataset.stage;
     state.qIndex = 0;
     state.answers = {};
     renderQuestion();
     showScreen("screen-survey");
   }
+});
+
+// 캡처 파일 선택 시 미리보기
+document.addEventListener("change", (e) => {
+  if (e.target && e.target.id === "msgImageInput") handleImageFile(e.target.files[0]);
 });

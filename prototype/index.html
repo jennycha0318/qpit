@@ -12,8 +12,9 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <span class="logo" data-action="home">Pacemaker <span class="logo-heart">💘</span></span>
-      <span class="topbar-tag">AI 연애 컨설팅 · 프로토타입</span>
+      <button class="icon-btn back-btn" id="backBtn" data-action="back" aria-label="뒤로 가기" style="visibility:hidden">←</button>
+      <span class="logo" data-action="home">Pacemaker</span>
+      <span class="topbar-tag">프로토타입</span>
     </header>
 
     <!-- ── 1. 랜딩 ─────────────────────────────── -->
@@ -26,11 +27,11 @@
           <b>언제·어떻게</b> 행동해야 성공 확률이 높은지 알려주는 AI 컨설턴트
         </p>
         <button class="btn btn-primary btn-lg" data-action="start">2분 진단 시작하기</button>
-        <button class="btn btn-ghost" data-action="message" style="margin-top:12px">💬 받은 메시지 해석하기</button>
+        <button class="btn btn-ghost" data-action="message" style="margin-top:12px">받은 메시지 해석하기</button>
         <ul class="hero-points">
-          <li>🎯 일반론 아닌 <b>내 상황</b> 맞춤 분석</li>
-          <li>🧭 ‘냉정한 거울’ — 듣기 좋은 말 대신 솔직한 진단</li>
-          <li>💬 바로 쓸 수 있는 <b>연락 문구</b>까지</li>
+          <li>일반론 아닌 <b>내 상황</b> 맞춤 분석</li>
+          <li>‘냉정한 거울’ — 듣기 좋은 말 대신 솔직한 진단</li>
+          <li>바로 쓸 수 있는 <b>연락 문구</b>까지</li>
         </ul>
       </div>
     </section>
@@ -68,15 +69,12 @@
         <h2 class="q-title" id="qTitle"></h2>
         <div class="q-options" id="qOptions"></div>
       </div>
-      <div class="survey-nav">
-        <button class="btn btn-ghost" id="btnPrev" data-action="prev">← 이전</button>
-      </div>
     </section>
 
     <!-- ── 4. 분석 중 ──────────────────────────── -->
     <section class="screen" id="screen-analyzing">
       <div class="analyzing">
-        <div class="pulse"><span>💘</span></div>
+        <div class="pulse"></div>
         <h2 class="analyzing-title">상황을 분석하고 있어요</h2>
         <p class="analyzing-step" id="analyzingStep">데이터 정규화 중…</p>
       </div>
@@ -86,9 +84,9 @@
     <section class="screen" id="screen-report">
       <div class="report" id="report"><!-- JS 렌더링 --></div>
       <div class="report-actions">
-        <button class="btn btn-primary" data-action="share">📤 결과 이미지로 공유</button>
-        <button class="btn btn-ghost" data-action="message" style="margin-top:10px">💬 받은 메시지 해석하기</button>
-        <button class="btn btn-ghost" data-action="restart" style="margin-top:10px">↺ 다시 진단하기</button>
+        <button class="btn btn-primary" data-action="share">결과 이미지로 공유</button>
+        <button class="btn btn-ghost" data-action="message" style="margin-top:10px">받은 메시지 해석하기</button>
+        <button class="btn btn-ghost" data-action="restart" style="margin-top:10px">다시 진단하기</button>
       </div>
       <p class="disclaimer">
         본 진단은 심리학 프레임워크 기반 <b>참고용</b>이며 미래를 보장하지 않습니다.
@@ -99,20 +97,34 @@
     <!-- ── 6. 받은 메시지 해석 (입력) ──────────── -->
     <section class="screen" id="screen-message">
       <div class="step-head">
-        <h2 class="step-title">받은 메시지 해석 💬</h2>
-        <p class="step-desc">상대에게 받은 카톡을 붙여넣으면 <b>온도</b>와 <b>속마음</b>을 분석해 드려요.</p>
+        <h2 class="step-title">받은 메시지 해석</h2>
+        <p class="step-desc">상대에게 받은 카톡을 <b>캡처 이미지</b>로 올리거나 <b>텍스트</b>로 붙여넣으면 온도와 속마음을 분석해 드려요.</p>
       </div>
+
+      <div class="upload-zone" data-action="pickImage">
+        <input type="file" id="msgImageInput" accept="image/*" hidden />
+        <div class="upload-prompt" id="uploadPrompt">
+          <span class="upload-ico">+</span>
+          <span class="upload-main">카톡 캡처 이미지 올리기</span>
+          <span class="upload-sub">탭하여 사진을 선택하세요</span>
+        </div>
+        <div class="upload-preview" id="uploadPreview" hidden>
+          <img id="msgImagePreview" alt="첨부한 캡처" />
+          <button class="upload-remove" data-action="removeImage">제거</button>
+        </div>
+      </div>
+
+      <p class="or-divider">또는 텍스트로 붙여넣기</p>
       <textarea id="msgInput" class="q-textarea" placeholder="예) 어 그래 알겠어. 나도 요즘 좀 바빠서… 나중에 시간 되면 보자"></textarea>
       <p class="msg-hint" id="msgHint"></p>
-      <button class="btn btn-primary" data-action="analyzeMsg">🔍 메시지 분석하기</button>
-      <button class="btn btn-ghost" data-action="home" style="margin-top:10px">← 처음으로</button>
+      <button class="btn btn-primary" data-action="analyzeMsg">메시지 분석하기</button>
     </section>
 
     <!-- ── 7. 메시지 해석 결과 ─────────────────── -->
     <section class="screen" id="screen-msgresult">
       <div class="report" id="msgReport"><!-- JS 렌더링 --></div>
       <div class="report-actions">
-        <button class="btn btn-ghost" data-action="message">↺ 다른 메시지 해석</button>
+        <button class="btn btn-ghost" data-action="message">다른 메시지 해석</button>
       </div>
       <p class="disclaimer">
         메시지 해석은 <b>참고용</b>이에요. 짧은 글로는 상대의 진심을 단정할 수 없으니,
