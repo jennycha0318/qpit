@@ -13,6 +13,8 @@ const STAGES: { v: Stage; emoji: string; name: string; note: string }[] = [
   { v: "breakup", emoji: "🔁", name: "이별 후", note: "재회하고 싶어요" },
 ];
 
+type SaveStatus = "idle" | "saving" | "saved" | "error" | "guest";
+
 export default function DiagnosePage() {
   const [phase, setPhase] = useState<"stage" | "survey" | "result">("stage");
   const [stage, setStage] = useState<Stage>("crush");
@@ -20,7 +22,7 @@ export default function DiagnosePage() {
   const [answers, setAnswers] = useState<Answers>({});
   const [free, setFree] = useState("");
   const [result, setResult] = useState<Diagnosis | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
 
   function pickStage(s: Stage) {
     setStage(s); setAnswers({}); setQIndex(0); setFree(""); setPhase("survey");
@@ -30,15 +32,20 @@ export default function DiagnosePage() {
     const d = diagnose(stage, ans);
     setResult(d);
     setPhase("result");
-    setSaving(true);
-    try {
-      const supabase = createClient();
-      await supabase.from("diagnoses").insert({ stage, score: d.score, result: d });
-    } catch {
-      // 저장 실패해도 결과는 표시
-    } finally {
-      setSaving(false);
+    setSaveStatus("saving"); // 즉시 피드백 (로그인 확인 동안)
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setSaveStatus("guest"); // 비로그인 — 저장 안 함, 로그인 유도
+      return;
     }
+    const { error } = await supabase.from("diagnoses").insert({
+      stage,
+      score: d.score,
+      result: d,
+    });
+    setSaveStatus(error ? "error" : "saved");
   }
 
   function selectOption(qid: string, v: string) {
@@ -52,16 +59,16 @@ export default function DiagnosePage() {
   }
 
   function reset() {
-    setPhase("stage"); setAnswers({}); setQIndex(0); setResult(null); setFree("");
+    setPhase("stage"); setAnswers({}); setQIndex(0); setResult(null); setFree(""); setSaveStatus("idle");
   }
 
   // ── 상황 선택 ──
   if (phase === "stage") {
     return (
       <div>
-        <Link href="/home" className="text-sm text-muted">← 홈</Link>
+        <Link href="/" className="text-sm text-muted">← 처음으로</Link>
         <h2 className="mb-1.5 mt-2 text-[23px] font-bold tracking-tight">지금 어떤 상황인가요?</h2>
-        <p className="mb-6 text-sm text-muted">상황에 맞춰 질문이 달라집니다.</p>
+        <p className="mb-6 text-sm text-muted">상황에 맞춰 질문이 달라집니다. 로그인 없이 바로 진단받을 수 있어요.</p>
         <div className="flex flex-col gap-3.5">
           {STAGES.map((s) => (
             <button key={s.v} onClick={() => pickStage(s.v)}
@@ -82,10 +89,28 @@ export default function DiagnosePage() {
   if (phase === "result" && result) {
     return (
       <div>
-        <p className="mb-3 text-center text-xs text-muted">{saving ? "결과 저장 중…" : "히스토리에 저장됨"}</p>
+        {saveStatus === "saving" && <p className="mb-3 text-center text-xs text-muted">결과 저장 중…</p>}
+        {saveStatus === "saved" && <p className="mb-3 text-center text-xs text-good">히스토리에 저장됨</p>}
+        {saveStatus === "error" && (
+          <p className="mb-3 text-center text-xs text-bad">저장에 실패했어요. 네트워크·로그인 상태를 확인하고 다시 시도해 주세요.</p>
+        )}
+
+        {saveStatus === "guest" && (
+          <div className="mb-4 rounded-2xl border border-primary bg-primarySoft p-4 text-center">
+            <p className="text-sm font-bold text-ink">이 결과를 저장할까요?</p>
+            <p className="mb-3 mt-1 text-[13px] text-muted">로그인하면 진단 결과가 히스토리에 저장돼 언제든 다시 볼 수 있어요.</p>
+            <div className="flex gap-2">
+              <Link href="/signup" className="btn btn-primary flex-1 text-center">회원가입</Link>
+              <Link href="/login" className="btn btn-ghost flex-1 text-center">로그인</Link>
+            </div>
+          </div>
+        )}
+
         <Report d={result} />
         <button className="btn btn-ghost mt-5" onClick={reset}>다시 진단하기</button>
-        <Link href="/home" className="btn btn-ghost mt-3 block text-center">홈으로</Link>
+        {saveStatus === "guest"
+          ? <Link href="/" className="btn btn-ghost mt-3 block text-center">처음으로</Link>
+          : <Link href="/home" className="btn btn-ghost mt-3 block text-center">홈으로</Link>}
       </div>
     );
   }

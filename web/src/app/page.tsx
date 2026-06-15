@@ -24,8 +24,8 @@ export default async function LandingPage() {
         <br />
         <b className="text-ink">언제·어떻게</b> 행동해야 성공 확률이 높은지 알려주는 AI 컨설턴트
       </p>
-      <Link href="/login" className="btn btn-primary block text-center">시작하기</Link>
-      <Link href="/signup" className="btn btn-ghost mt-3 block text-center">회원가입</Link>
+      <Link href="/diagnose" className="btn btn-primary block text-center">무료로 진단 시작 (로그인 없이)</Link>
+      <Link href="/login" className="btn btn-ghost mt-3 block text-center">로그인 · 회원가입</Link>
       <ul className="mt-8 flex flex-col gap-3 text-sm">
         <li className="card">일반론 아닌 <b>내 상황</b> 맞춤 분석</li>
         <li className="card">‘냉정한 거울’ — 듣기 좋은 말 대신 솔직한 진단</li>

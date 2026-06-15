@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
-const PROTECTED = ["/home", "/diagnose", "/history", "/profile"];
+// /diagnose 는 비로그인도 체험 가능 (저장만 로그인 필요)
+const PROTECTED = ["/home", "/history", "/profile"];
 
 // 요청마다 세션 갱신 + 보호 경로 접근 제어
 export async function updateSession(request: NextRequest) {

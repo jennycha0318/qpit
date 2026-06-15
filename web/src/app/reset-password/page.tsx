@@ -14,7 +14,7 @@ export default function ResetPasswordPage() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErr("올바른 이메일을 입력해 주세요.");
     const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${location.origin}/auth/callback?next=/profile`,
+      redirectTo: `${location.origin}/auth/callback?next=/update-password`,
     });
     if (error) setErr(error.message);
     else setOk("재설정 링크를 이메일로 보냈어요. 메일을 확인해 주세요.");
