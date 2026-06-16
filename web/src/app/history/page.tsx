@@ -21,10 +21,21 @@ function fmt(ts: string) {
 
 export default async function HistoryPage() {
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("diagnoses")
     .select("id, stage, score, result, created_at")
     .order("created_at", { ascending: false });
+
+  if (error) {
+    return (
+      <div>
+        <h2 className="mb-1.5 text-[23px] font-bold tracking-tight">진단 히스토리</h2>
+        <div className="card text-center text-sm text-muted">
+          기록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
+        </div>
+      </div>
+    );
+  }
   const rows = (data ?? []) as Row[];
 
   return (
@@ -48,8 +59,8 @@ export default async function HistoryPage() {
                   <span className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-xl text-lg font-bold"
                     style={{ color, background: `${color}1a` }}>{r.score}</span>
                   <span className="flex min-w-0 flex-col">
-                    <b className="text-[14.5px]">{STAGE_LABEL[r.stage]} · {r.result?.scoreTitle}</b>
-                    <span className="text-[12.5px] text-primaryDark">{r.result?.plan?.when}</span>
+                    <b className="text-[14.5px]">{STAGE_LABEL[r.stage] ?? "진단"} · {r.result?.scoreTitle ?? "결과"}</b>
+                    <span className="text-[12.5px] text-primaryDark">{r.result?.plan?.when ?? ""}</span>
                     <span className="text-[11.5px] text-muted">{fmt(r.created_at)}</span>
                   </span>
                 </Link>

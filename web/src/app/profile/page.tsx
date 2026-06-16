@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/SignOutButton";
 
@@ -9,12 +8,13 @@ export default async function ProfilePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const { count } = await supabase
+  const { count, error: countErr } = await supabase
     .from("diagnoses")
     .select("*", { count: "exact", head: true });
 
   const name = (user?.user_metadata?.name as string) || "-";
   const provider = user?.app_metadata?.provider === "google" ? "Google 계정" : "이메일";
+  const countText = countErr ? "-" : `${count ?? 0}회`;
 
   const Row = ({ k, v }: { k: string; v: string }) => (
     <div className="flex justify-between border-b border-line py-3 text-sm last:border-0">
@@ -30,7 +30,7 @@ export default async function ProfilePage() {
         <Row k="이름" v={name} />
         <Row k="이메일" v={user?.email ?? "-"} />
         <Row k="로그인 방식" v={provider} />
-        <Row k="진단 횟수" v={`${count ?? 0}회`} />
+        <Row k="진단 횟수" v={countText} />
       </div>
       <SignOutButton />
     </div>

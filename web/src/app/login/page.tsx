@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -13,14 +13,26 @@ export default function LoginPage() {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // OAuth 콜백 실패 시 /login?error=auth 로 돌아옴 → 안내 표시
+  useEffect(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("error") === "auth") {
+      setErr("로그인에 실패했어요. 다시 시도해 주세요.");
+    }
+  }, []);
+
   async function login() {
     setErr("");
     setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
-    setLoading(false);
-    if (error) setErr("이메일 또는 비밀번호가 올바르지 않아요.");
-    else router.push("/diagnose");
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
+      if (error) setErr("이메일 또는 비밀번호가 올바르지 않아요.");
+      else router.push("/diagnose");
+    } catch {
+      setErr("네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

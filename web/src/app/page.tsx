@@ -5,11 +5,15 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export default async function LandingPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user) redirect("/diagnose");
+  let user = null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // auth 서비스 장애 시에도 랜딩은 정상 노출 (비로그인 취급)
+  }
+  if (user) redirect("/diagnose"); // redirect는 try 밖 (내부적으로 throw 사용)
 
   return (
     <div className="pt-6">

@@ -18,19 +18,25 @@ export default function SignupPage() {
   async function signup() {
     setErr(""); setOk("");
     if (!name.trim()) return setErr("이름(닉네임)을 입력해 주세요.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErr("올바른 이메일을 입력해 주세요.");
     if (pw.length < 6) return setErr("비밀번호는 6자 이상이어야 해요.");
     setLoading(true);
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password: pw,
-      options: { data: { name }, emailRedirectTo: `${location.origin}/auth/callback` },
-    });
-    setLoading(false);
-    if (error) return setErr(error.message);
-    // 이메일 인증이 꺼져 있으면 즉시 세션 생성됨
-    if (data.session) router.push("/diagnose");
-    else setOk("가입 확인 메일을 보냈어요. 메일의 링크를 눌러 인증을 완료해 주세요.");
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: pw,
+        options: { data: { name }, emailRedirectTo: `${location.origin}/auth/callback` },
+      });
+      if (error) return setErr(error.message);
+      // 이메일 인증이 꺼져 있으면 즉시 세션 생성됨
+      if (data.session) router.push("/diagnose");
+      else setOk("가입 확인 메일을 보냈어요. 메일의 링크를 눌러 인증을 완료해 주세요.");
+    } catch {
+      setErr("네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

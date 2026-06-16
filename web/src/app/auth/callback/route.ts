@@ -5,12 +5,15 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/diagnose";
+  // open redirect 방지: 내부 절대경로만 허용 (`//`, `/\` 등 외부 리다이렉트 차단)
+  const raw = searchParams.get("next") ?? "/diagnose";
+  const next = /^\/[^/\\]/.test(raw) ? raw : "/diagnose";
 
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(`${origin}${next}`);
+    console.error("Auth callback error:", error.message);
   }
   return NextResponse.redirect(`${origin}/login?error=auth`);
 }

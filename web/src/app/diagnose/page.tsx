@@ -28,24 +28,32 @@ export default function DiagnosePage() {
     setStage(s); setAnswers({}); setQIndex(0); setFree(""); setPhase("survey");
   }
 
-  async function finish(ans: Answers) {
+  async function saveDiagnosis(d: Diagnosis) {
+    setSaveStatus("saving"); // 즉시 피드백 (로그인 확인 동안)
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setSaveStatus("guest"); // 비로그인 — 저장 안 함, 로그인 유도
+        return;
+      }
+      const { error } = await supabase.from("diagnoses").insert({
+        user_id: user.id,
+        stage,
+        score: d.score,
+        result: d,
+      });
+      setSaveStatus(error ? "error" : "saved");
+    } catch {
+      setSaveStatus("error"); // 네트워크/예외 — 무한 'saving' 방지
+    }
+  }
+
+  function finish(ans: Answers) {
     const d = diagnose(stage, ans);
     setResult(d);
     setPhase("result");
-    setSaveStatus("saving"); // 즉시 피드백 (로그인 확인 동안)
-
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setSaveStatus("guest"); // 비로그인 — 저장 안 함, 로그인 유도
-      return;
-    }
-    const { error } = await supabase.from("diagnoses").insert({
-      stage,
-      score: d.score,
-      result: d,
-    });
-    setSaveStatus(error ? "error" : "saved");
+    saveDiagnosis(d);
   }
 
   function selectOption(qid: string, v: string) {
@@ -92,7 +100,11 @@ export default function DiagnosePage() {
         {saveStatus === "saving" && <p className="mb-3 text-center text-xs text-muted">결과 저장 중…</p>}
         {saveStatus === "saved" && <p className="mb-3 text-center text-xs text-good">히스토리에 저장됨</p>}
         {saveStatus === "error" && (
-          <p className="mb-3 text-center text-xs text-bad">저장에 실패했어요. 네트워크·로그인 상태를 확인하고 다시 시도해 주세요.</p>
+          <div className="mb-3 text-center">
+            <p className="text-xs text-bad">저장에 실패했어요. 네트워크·로그인 상태를 확인해 주세요.</p>
+            <button className="mt-1.5 text-xs font-bold text-primaryDark underline"
+              onClick={() => result && saveDiagnosis(result)}>다시 저장</button>
+          </div>
         )}
 
         {saveStatus === "guest" && (

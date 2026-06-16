@@ -23,18 +23,29 @@ export default function UpdatePasswordPage() {
       .catch(() => setReady(false));
   }, []);
 
+  // 변경 성공 후 이동 (언마운트 시 타이머 정리)
+  useEffect(() => {
+    if (!ok) return;
+    const t = setTimeout(() => router.push("/diagnose"), 1200);
+    return () => clearTimeout(t);
+  }, [ok, router]);
+
   async function update() {
     setErr(""); setOk("");
     if (!ready) return setErr("세션이 유효하지 않아요. 재설정 링크로 다시 들어와 주세요.");
     if (pw.length < 6) return setErr("비밀번호는 6자 이상이어야 해요.");
     if (pw !== pw2) return setErr("두 비밀번호가 일치하지 않아요.");
     setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password: pw });
-    setLoading(false);
-    if (error) return setErr(error.message);
-    setOk("비밀번호가 변경됐어요. 잠시 후 이동합니다.");
-    setTimeout(() => router.push("/diagnose"), 1200);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({ password: pw });
+      if (error) return setErr(error.message);
+      setOk("비밀번호가 변경됐어요. 잠시 후 이동합니다.");
+    } catch {
+      setErr("네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (ready === false) {

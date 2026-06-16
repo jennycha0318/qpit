@@ -13,13 +13,13 @@ export default async function HistoryDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("diagnoses")
     .select("result")
     .eq("id", id)
     .single();
 
-  if (!data) notFound();
+  if (error || !data || !data.result || typeof data.result !== "object") notFound();
   const d = data.result as Diagnosis;
 
   return (
