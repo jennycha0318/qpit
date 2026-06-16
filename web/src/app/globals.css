@@ -2,16 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 감탄로드 돋움체 (강원특별자치도 / fonts-archive) */
+@font-face {
+  font-family: "GamtanRoad Dotum";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/fonts-archive/GamtanRoadDotum/GamtanRoadDotum-Regular.woff2") format("woff2"),
+    url("https://cdn.jsdelivr.net/gh/fonts-archive/GamtanRoadDotum/GamtanRoadDotum-Regular.woff") format("woff");
+}
+@font-face {
+  font-family: "GamtanRoad Dotum";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/fonts-archive/GamtanRoadDotum/GamtanRoadDotum-Bold.woff2") format("woff2"),
+    url("https://cdn.jsdelivr.net/gh/fonts-archive/GamtanRoadDotum/GamtanRoadDotum-Bold.woff") format("woff");
+}
+
 :root {
   color-scheme: light;
 }
 
 body {
-  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  background: #fbf6f3;
-  color: #2a2438;
+  font-family: "GamtanRoad Dotum", "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: #f5f7f5;
+  color: #1e2a25;
   -webkit-font-smoothing: antialiased;
+  /* 한글 줄바꿈: 단어 단위로(어절) 끊기 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 @layer components {
@@ -19,7 +40,7 @@ body {
     @apply w-full rounded-2xl px-5 py-3.5 text-[15px] font-bold transition active:scale-[0.98];
   }
   .btn-primary {
-    @apply bg-gradient-to-br from-primary to-primaryDark text-white shadow-lg shadow-primary/30;
+    @apply bg-gradient-to-br from-primary to-primaryDark text-white shadow-lg shadow-primary/25;
   }
   .btn-ghost {
     @apply border border-line bg-transparent text-muted hover:text-ink;

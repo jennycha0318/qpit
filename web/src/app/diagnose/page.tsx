@@ -8,10 +8,10 @@ import { diagnose, type Answers, type Diagnosis } from "@/lib/diagnose/engine";
 import { Report } from "@/components/Report";
 import { LegalEthicsNotice } from "@/components/SupportNotices";
 
-const STAGES: { v: Stage; emoji: string; name: string; note: string }[] = [
-  { v: "crush", emoji: "🌱", name: "썸 타는 중", note: "고백 타이밍이 고민돼요" },
-  { v: "dating", emoji: "💞", name: "연애 중", note: "관계가 불안해요" },
-  { v: "breakup", emoji: "🔁", name: "이별 후", note: "재회하고 싶어요" },
+const STAGES: { v: Stage; name: string; note: string }[] = [
+  { v: "crush", name: "썸 타는 중", note: "고백 타이밍이 고민돼요" },
+  { v: "dating", name: "연애 중", note: "관계가 불안해요" },
+  { v: "breakup", name: "이별 후", note: "재회하고 싶어요" },
 ];
 
 type SaveStatus = "idle" | "saving" | "saved" | "error" | "guest";
@@ -117,12 +117,12 @@ export default function DiagnosePage() {
         <div className="flex flex-col gap-3.5">
           {STAGES.map((s) => (
             <button key={s.v} onClick={() => pickStage(s.v)}
-              className="flex items-center gap-4 rounded-[18px] border-[1.5px] border-line bg-surface p-5 text-left hover:border-primary">
-              <span className="text-[34px]">{s.emoji}</span>
+              className="flex items-center justify-between rounded-[18px] border-[1.5px] border-line bg-surface p-5 text-left transition hover:border-primary">
               <span>
                 <span className="block text-lg font-bold">{s.name}</span>
                 <span className="block text-[13px] text-muted">{s.note}</span>
               </span>
+              <span className="text-xl text-muted" aria-hidden="true">›</span>
             </button>
           ))}
         </div>
@@ -181,7 +181,7 @@ export default function DiagnosePage() {
       <button onClick={() => (qIndex > 0 ? setQIndex(qIndex - 1) : reset())} className="text-sm text-muted">← 이전</button>
       <div className="my-3 h-1.5 overflow-hidden rounded-full bg-line"
         role="progressbar" aria-label="설문 진행률" aria-valuemin={0} aria-valuemax={total} aria-valuenow={qIndex + 1}>
-        <div className="h-full rounded-full bg-gradient-to-r from-primary to-[#7d6fd6] transition-all"
+        <div className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all"
           style={{ width: `${(qIndex / total) * 100}%` }} />
       </div>
       <p className="mb-2.5 text-[13px] font-bold text-primaryDark">질문 {qIndex + 1} / {total}</p>

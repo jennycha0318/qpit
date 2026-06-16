@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+
+// 인증/랜딩 화면에서는 탭 숨김. 그 외 앱 화면(진단·히스토리·프로필 등)에선 항상 표시.
+const HIDE_ON = ["/", "/login", "/signup", "/reset-password", "/update-password"];
 
 const TABS = [
   {
@@ -41,18 +42,7 @@ const TABS = [
 
 export function TabBar() {
   const pathname = usePathname();
-  const [authed, setAuthed] = useState(false);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => setAuthed(!!user)).catch(() => setAuthed(false));
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_e, session) => setAuthed(!!session?.user));
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (!authed) return null;
+  if (HIDE_ON.includes(pathname)) return null;
 
   return (
     <nav aria-label="주요 메뉴" className="fixed bottom-0 left-1/2 z-20 w-full max-w-app -translate-x-1/2 border-t border-line bg-surface/95 backdrop-blur">
