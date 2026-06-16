@@ -1,5 +1,5 @@
 import type { Diagnosis } from "@/lib/diagnose/engine";
-import { CrisisResources, LegalEthicsNotice } from "@/components/SupportNotices";
+import { CrisisResources, LegalEthicsNotice, MinorSupportBanner } from "@/components/SupportNotices";
 
 export function Report({ d }: { d: Diagnosis }) {
   const color = d.score >= 65 ? "#2fa66b" : d.score >= 45 ? "#e0902f" : "#d65b58";
@@ -14,6 +14,9 @@ export function Report({ d }: { d: Diagnosis }) {
 
   return (
     <div className="flex flex-col gap-[18px]">
+      {/* 청소년(미성년) 지지 배너 — 항상 최상단 */}
+      {d.minor && <MinorSupportBanner />}
+
       {/* 점수 */}
       <div className="card text-center">
         <p className="mb-1 text-sm font-bold text-muted">{d.scoreTitle}</p>
@@ -33,8 +36,8 @@ export function Report({ d }: { d: Diagnosis }) {
         <p className="mt-3 text-sm text-muted">{d.reason}</p>
       </div>
 
-      {/* 위기 신호 시 상담 연결 */}
-      {d.needsSupport && <CrisisResources />}
+      {/* 위기 신호 시 상담 연결 (청소년은 눈높이 변형) */}
+      {d.needsSupport && <CrisisResources minor={d.minor} />}
 
       {/* 언제·어떻게 */}
       <div className="card">
@@ -111,8 +114,8 @@ export function Report({ d }: { d: Diagnosis }) {
         )}
       </div>
 
-      {/* 법적·윤리 고지 (외도·학대) */}
-      <LegalEthicsNotice compact />
+      {/* 법적·윤리 고지 (외도·학대) — 청소년에겐 비노출(지지 중심) */}
+      {!d.minor && <LegalEthicsNotice compact />}
     </div>
   );
 }

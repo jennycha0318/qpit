@@ -17,7 +17,8 @@ const STAGES: { v: Stage; emoji: string; name: string; note: string }[] = [
 type SaveStatus = "idle" | "saving" | "saved" | "error" | "guest";
 
 export default function DiagnosePage() {
-  const [phase, setPhase] = useState<"stage" | "survey" | "result">("stage");
+  const [phase, setPhase] = useState<"age" | "stage" | "survey" | "result">("age");
+  const [ageGroup, setAgeGroup] = useState<string | null>(null);
   const [stage, setStage] = useState<Stage>("crush");
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
@@ -61,6 +62,7 @@ export default function DiagnosePage() {
   function finish(ans: Answers) {
     const s = stage; // 호출 시점 stage 고정
     const d = diagnose(s, ans);
+    d.minor = ageGroup === "10대"; // 청소년 눈높이 모드
     setResult(d);
     setPhase("result");
     saveDiagnosis(d, s);
@@ -84,11 +86,32 @@ export default function DiagnosePage() {
     setPhase("stage"); setAnswers({}); setQIndex(0); setResult(null); setFree(""); setSaveStatus("idle");
   }
 
-  // ── 상황 선택 ──
-  if (phase === "stage") {
+  // ── 나이대 선택 ──
+  if (phase === "age") {
+    const AGES = ["10대", "20대", "30대", "40대 이상"];
     return (
       <div>
         <Link href="/" className="text-sm text-muted">← 처음으로</Link>
+        <h2 className="mb-1.5 mt-2 text-[23px] font-bold tracking-tight">나이대를 알려주세요</h2>
+        <p className="mb-6 text-sm text-muted">나이에 맞춰 더 편하게 설명해 드릴게요.</p>
+        <div className="grid grid-cols-2 gap-3">
+          {AGES.map((g) => (
+            <button key={g} onClick={() => { setAgeGroup(g); setPhase("stage"); }}
+              className="rounded-2xl border-[1.5px] border-line bg-surface px-4 py-5 text-base font-bold hover:border-primary">
+              {g}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ── 상황 선택 ──
+  if (phase === "stage") {
+    const isMinor = ageGroup === "10대";
+    return (
+      <div>
+        <button onClick={() => setPhase("age")} className="text-sm text-muted">← 나이대</button>
         <h2 className="mb-1.5 mt-2 text-[23px] font-bold tracking-tight">지금 어떤 상황인가요?</h2>
         <p className="mb-6 text-sm text-muted">상황에 맞춰 질문이 달라집니다. 로그인 없이 바로 진단받을 수 있어요.</p>
         <div className="flex flex-col gap-3.5">
@@ -103,9 +126,13 @@ export default function DiagnosePage() {
             </button>
           ))}
         </div>
-        <div className="mt-6 rounded-xl border border-line bg-surface/60 p-3.5">
-          <LegalEthicsNotice />
-        </div>
+        {isMinor ? (
+          <p className="mt-6 text-center text-[12px] text-muted">편하게 골라줘요. 정답은 없어요.</p>
+        ) : (
+          <div className="mt-6 rounded-xl border border-line bg-surface/60 p-3.5">
+            <LegalEthicsNotice />
+          </div>
+        )}
       </div>
     );
   }

@@ -19,6 +19,7 @@ export interface Diagnosis {
   hold?: string;
   plan: Plan;
   needsSupport?: boolean; // 정서 위기 신호 → 상담 연결 노출
+  minor?: boolean; // 미성년(10대) → 청소년 눈높이 톤 + 지지 강화
 }
 
 type Map = Record<string, [number, string]>;
