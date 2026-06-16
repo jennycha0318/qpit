@@ -55,7 +55,7 @@ export function TabBar() {
   if (!authed) return null;
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-20 w-full max-w-app -translate-x-1/2 border-t border-line bg-surface/95 backdrop-blur">
+    <nav aria-label="주요 메뉴" className="fixed bottom-0 left-1/2 z-20 w-full max-w-app -translate-x-1/2 border-t border-line bg-surface/95 backdrop-blur">
       <div className="flex">
         {TABS.map((t) => {
           const active = pathname === t.href || pathname.startsWith(t.href + "/");
@@ -63,6 +63,8 @@ export function TabBar() {
             <Link
               key={t.href}
               href={t.href}
+              aria-label={t.label}
+              aria-current={active ? "page" : undefined}
               className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${
                 active ? "text-primary" : "text-muted"
               }`}
@@ -76,6 +78,7 @@ export function TabBar() {
                 strokeWidth={active ? 2 : 1.7}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                aria-hidden="true"
               >
                 {t.icon}
               </svg>

@@ -45,7 +45,7 @@ const FREE_TEXT_Q: Question = {
   id: "freeText",
   type: "text",
   title: "상황을 자유롭게 적어주세요",
-  desc: "무슨 일이 있었는지, 무엇이 가장 고민인지 적을수록 더 맞춤으로 분석해요. (선택)",
+  desc: "무슨 일이 있었는지 적어두면 기록으로 저장돼요. (지금은 진단 점수에 반영되지 않고, 추후 AI 개인화에 활용될 예정이에요 · 선택)",
   placeholder: "예) 일이 바빠서 소홀했고, 마지막에 크게 싸우고 헤어졌어요…",
 };
 const COMMON = [PARTNER_Q, SELF_ATTACH_Q, SELF_URGENCY_Q, FREE_TEXT_Q];

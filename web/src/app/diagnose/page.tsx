@@ -148,7 +148,8 @@ export default function DiagnosePage() {
   return (
     <div>
       <button onClick={() => (qIndex > 0 ? setQIndex(qIndex - 1) : reset())} className="text-sm text-muted">← 이전</button>
-      <div className="my-3 h-1.5 overflow-hidden rounded-full bg-line">
+      <div className="my-3 h-1.5 overflow-hidden rounded-full bg-line"
+        role="progressbar" aria-label="설문 진행률" aria-valuemin={0} aria-valuemax={total} aria-valuenow={qIndex + 1}>
         <div className="h-full rounded-full bg-gradient-to-r from-primary to-[#7d6fd6] transition-all"
           style={{ width: `${(qIndex / total) * 100}%` }} />
       </div>
@@ -159,7 +160,7 @@ export default function DiagnosePage() {
         <div>
           {q.desc && <p className="-mt-2 mb-3.5 text-sm text-muted">{q.desc}</p>}
           <textarea className="field-input min-h-[140px] resize-y leading-relaxed" placeholder={q.placeholder}
-            value={free} onChange={(e) => setFree(e.target.value)} />
+            aria-label={q.title} value={free} onChange={(e) => setFree(e.target.value)} />
           <button className="btn btn-primary mt-3.5" onClick={() => finish({ ...answers, freeText: free })}>진단 받기</button>
           <button className="btn btn-ghost mt-2.5" onClick={() => finish({ ...answers, freeText: "" })}>건너뛰고 진단하기</button>
         </div>
