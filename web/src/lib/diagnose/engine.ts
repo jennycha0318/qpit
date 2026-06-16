@@ -18,6 +18,7 @@ export interface Diagnosis {
   msg?: string;
   hold?: string;
   plan: Plan;
+  needsSupport?: boolean; // 정서 위기 신호 → 상담 연결 노출
 }
 
 type Map = Record<string, [number, string]>;
@@ -86,6 +87,7 @@ function diagnoseCrush(a: Answers): Diagnosis {
     res.hold = "지금은 고백 문구를 보내기보다, 가벼운 일상 공유로 ‘편안한 접점’을 유지하는 단계예요. 무리한 직진은 권하지 않습니다.";
   }
   if (clingy) res.risks.unshift("나만 주도하고 있어요. 연락 빈도를 의식적으로 줄여 상대의 자발성을 확인하세요.");
+  res.needsSupport = clingy && score < 45;
   return res;
 }
 
@@ -136,6 +138,7 @@ function diagnoseDating(a: Answers): Diagnosis {
     res.msg = "요즘 너와 나 사이가 예전 같지 않게 느껴져.\n탓하려는 게 아니라, 우리가 어떤 상태인지 솔직하게 한번 얘기하고 싶어.";
   }
   if (anxiousClingy) res.risks.unshift("불안이 큰 상태예요. 확인·추궁은 줄이고, 내 감정을 ‘나 전달법’으로 차분히 표현하는 데 집중하세요.");
+  res.needsSupport = anxiousClingy && score < 45;
   return res;
 }
 
@@ -170,6 +173,7 @@ function diagnoseBreakup(a: Answers): Diagnosis {
     res.risks = ["반복·우회 연락은 스토킹으로 비칠 수 있어요. 절대 금물.", "상대의 명확한 거부 의사를 존중하는 것이 가장 품위 있는 선택입니다.", "당신의 회복과 일상이 지금 가장 중요합니다."];
     res.msgLabel = "지금은 메시지를 보내지 마세요";
     res.hold = "지금 어떤 메시지도, 어떤 경로로도 보내지 마세요. 차단은 분명한 신호예요. 연락하고 싶은 충동이 들면 보내는 대신 그 마음을 메모로만 남겨두세요.";
+    res.needsSupport = true;
     return res;
   }
 
@@ -207,6 +211,7 @@ function diagnoseBreakup(a: Answers): Diagnosis {
   }
   if (otherPerson) res.risks.unshift("상대에게 새로운 사람이 있다면, 끼어드는 연락은 역효과예요. 거리를 두고 상황을 지켜보세요.");
   if (clingy) res.risks.unshift("불안에 떠밀린 잦은 연락이 감지돼요. 지금은 연락을 멈추고 나를 회복하는 것이 최우선입니다.");
+  res.needsSupport = score < 45 || clingy;
   return res;
 }
 

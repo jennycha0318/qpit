@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { SURVEYS, type Stage } from "@/lib/diagnose/survey";
 import { diagnose, type Answers, type Diagnosis } from "@/lib/diagnose/engine";
 import { Report } from "@/components/Report";
+import { LegalEthicsNotice } from "@/components/SupportNotices";
 
 const STAGES: { v: Stage; emoji: string; name: string; note: string }[] = [
   { v: "crush", emoji: "🌱", name: "썸 타는 중", note: "고백 타이밍이 고민돼요" },
@@ -101,6 +102,9 @@ export default function DiagnosePage() {
               </span>
             </button>
           ))}
+        </div>
+        <div className="mt-6 rounded-xl border border-line bg-surface/60 p-3.5">
+          <LegalEthicsNotice />
         </div>
       </div>
     );
