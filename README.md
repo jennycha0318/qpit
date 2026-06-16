@@ -1,4 +1,4 @@
-# Pacemaker 💘
+# Pacemaker
 
 > AI 기반 연애·재회 의사결정 컨설팅 서비스
 
@@ -6,30 +6,48 @@
 연애의 결정적 순간마다, 내 상황과 상대 성향 데이터를 분석해
 **언제·어떻게 행동해야 성공 확률이 높은지** 알려주는 AI 연애 컨설턴트.
 
-## 🚀 데모 바로 써보기 (다운로드)
-**[⬇️ pacemaker.html 다운로드](https://github.com/jennycha0318/pacemaker/raw/main/pacemaker.html)**
-— 단일 파일이라 받아서 **더블클릭만 하면** 브라우저에서 바로 실행됩니다. (서버·설치 불필요)
-
-> 이 파일은 `prototype/` 소스를 합쳐 자동 생성됩니다.
-> 소스 수정 후 다시 만들려면: `node prototype/build.js`
-> (개발 중 분리된 버전으로 보려면 `prototype/index.html`)
-
 ## 라이브
-- 🌐 https://pacemaker-six-eta.vercel.app (Vercel)
+- 🌐 https://pacemaker-six-eta.vercel.app
+
+## 지금까지 만든 것 (현재 상태)
+- **인증** — 이메일/비밀번호 + Google OAuth + 비밀번호 재설정 (Supabase Auth)
+- **진단** — 썸(고백)/연애(유지)/이별(재회) 상황별 설문 → 규칙 엔진이 **타이밍 점수 + 언제·어떻게 플랜 + 근거·액션·메시지** 산출
+- **게스트 체험** — 로그인 없이 진단 1회 체험, 저장·히스토리는 로그인
+- **히스토리** — 진단 결과 저장·목록·재열람 (사용자별, RLS 보안)
+- **하단 탭** — 진단 / 히스토리 / 프로필 (앱 화면 공통)
+- **안전·윤리**
+  - 위기 신호 감지 시 **심리상담 연결** (자살예방 109, 청소년 9~24세 1388/#1388)
+  - **외도·학대 법적·윤리 사전 고지** + 대한법률구조공단 무료상담 링크
+  - **개인정보 수집·이용 동의** + 개인정보처리방침
+  - **청소년(미성년) 눈높이 모드** — 부드러운 지지 톤, 자극 최소화
+- **디자인** — 초록 메인(안정감), 감탄로드 돋움체, 한글 단어단위 줄바꿈
 
 ## 문서
 - [제품 기획서 (PRD)](docs/PRD.md)
 - [기능 명세 (Functional Spec)](docs/functional-spec/README.md) — 페이지별 spec + [flow](docs/functional-spec/flow.md)
 - [백엔드 · DB 스키마](docs/backend/schema.md)
+- [개선 백로그 (페르소나 감사)](docs/improvement-backlog.md)
+- [AI 개인화 설계](docs/product/ai-personalization.md) · [디자인](docs/design/design-system.md)
+
+## 기술 스택
+- **앱(web/)**: Next.js 15 (App Router, TypeScript, Tailwind)
+- **인증·DB**: Supabase (Auth + Postgres + RLS)
+- **호스팅**: Vercel
+- 셋업·실행: [web/SETUP.md](web/SETUP.md)
+
+## 저장소 구조
+```
+docs/        기획·기능명세·백엔드·디자인 문서
+prototype/   초기 HTML 프로토타입 (탐색용, 디자인은 web/ 와 별개)
+pacemaker.html  프로토타입 단일 파일 데모(다운로드용)
+web/         실제 제품 (Next.js + Supabase)
+```
+> 참고: `prototype/`(및 `pacemaker.html`)는 초기 탐색용이라 최신 web/ 앱과 디자인·기능이 다릅니다. 최신 제품은 `web/` 입니다.
 
 ## 개발 로드맵
 1. ✅ 기획 (PRD)
-2. ✅ HTML 프로토타입 (진단 + 플랜 + 메시지 해석 + 공유 + mock 인증/히스토리)
-3. 🚧 MVP — Next.js + Supabase (인증/DB/히스토리) · [web/SETUP.md](web/SETUP.md)
-4. ⬜ AI 개인화(Claude) 결합 + 메시지 해석 이식
-5. ⬜ 확장 (타임라인 컨설팅 / 시뮬레이션)
-
-## 기술 스택 (예정)
-- 프로토타입: HTML / CSS / JS
-- 제품: Next.js + TypeScript + Tailwind
-- AI: Claude API (claude-opus-4-8)
+2. ✅ HTML 프로토타입
+3. ✅ MVP — Next.js + Supabase (인증·진단·히스토리)
+4. ✅ 안전·윤리 (상담연결·법률고지·동의·청소년 모드)
+5. ⬜ AI 개인화(Claude) 결합 — 자유서술 실제 반영
+6. ⬜ 백로그 우선순위 반영 (히스토리 추세, 상대 유형별 액션 등)

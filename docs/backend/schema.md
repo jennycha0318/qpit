@@ -42,8 +42,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...   # publishable(공개) 키
 
 ### 사용자 데이터 (auth.users)
 - `email`
-- `user_metadata.name` — 가입 시 입력한 닉네임 (`options.data.name`)
+- `user_metadata.name` — 가입 시 입력한 닉네임 (`options.data.name`, 구글은 계정 표시이름)
 - `app_metadata.provider` — `email` 또는 `google`
+
+### 개인정보 동의
+- 회원가입 시 **필수 동의 체크박스** → 미동의 시 가입 차단. 개인정보처리방침: `/privacy`.
+- 콜백(`/auth/callback`)은 `next` 파라미터를 내부 경로로만 허용(오픈 리다이렉트 차단).
 
 ### 세션 관리
 - `@supabase/ssr` 사용. 쿠키 기반 세션.
@@ -96,10 +100,13 @@ PROTECTED = ["/home", "/history", "/profile"]
     "tone": "good",            // good | warn | bad
     "channel": "카카오톡 — 가벼운 안부 한 통",
     "steps": [{ "time": "오늘~3일 내", "action": "…" }]
-  }
+  },
+  "needsSupport": false,         // 정서 위기 신호 → 결과에 심리상담 카드
+  "minor": false                 // 10대 선택 시 청소년 눈높이 모드
 }
 ```
 > `score`/`stage`는 쿼리·정렬용으로 컬럼에도 중복 저장(비정규화). `result`는 렌더링용 전체 스냅샷.
+> **나이대(ageGroup)·minor·needsSupport는 별도 컬럼이 아니라 `result` jsonb 안에만** 저장됨(테이블 스키마 변경 없음). `minor`는 페이지에서, `needsSupport`는 엔진에서 결정.
 
 ### RLS (행 수준 보안)
 ```sql
@@ -118,7 +125,7 @@ create policy "diagnoses_delete_own" ... using (auth.uid() = user_id);
 
 | 동작 | 위치 | 코드 |
 |------|------|------|
-| 진단 저장 | diagnose (client) | `supabase.from("diagnoses").insert({stage,score,result})` |
+| 진단 저장 | diagnose (client) | `supabase.from("diagnoses").insert({user_id,stage,score,result})` (로그인 시만) |
 | 히스토리 목록 | history (server) | `.select("id,stage,score,result,created_at").order("created_at",{ascending:false})` |
 | 히스토리 상세 | history/[id] (server) | `.select("result").eq("id",id).single()` |
 | 진단 횟수 | profile (server) | `.select("*",{count:"exact",head:true})` |

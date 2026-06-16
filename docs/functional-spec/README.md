@@ -19,11 +19,13 @@ Pacemaker 웹앱의 기능 명세. 페이지별 spec + 전체 flow.
 | 히스토리 | `/history` | 로그인 | [history.md](pages/history.md) |
 | 히스토리 상세 | `/history/[id]` | 로그인 | [history-detail.md](pages/history-detail.md) |
 | 프로필 | `/profile` | 로그인 | [profile.md](pages/profile.md) |
+| 개인정보처리방침 | `/privacy` | 공개 | (페이지: `web/src/app/privacy/page.tsx`) |
 
 부가:
 - `/home` → `/diagnose` 리다이렉트 (구 대시보드, 하단 탭으로 대체)
 - `/auth/callback` → OAuth·이메일 인증 콜백 (페이지 아님, [flow.md](flow.md) 참조)
-- 하단 탭바(진단/히스토리/프로필) → 로그인 시 전역 표시 ([flow.md](flow.md) 네비게이션)
+- 하단 탭바(진단/히스토리/프로필) → **앱 화면에서 항상 표시**(랜딩·인증 화면 제외) ([flow.md](flow.md) §4)
+- 진단은 **나이대 선택(10대=청소년 모드)** → 상황 → 설문 순. 안전 고지(상담·법률·동의)는 [flow.md](flow.md) §6 참조.
 
 ## 관련 문서
 - 백엔드/DB: [../backend/schema.md](../backend/schema.md)

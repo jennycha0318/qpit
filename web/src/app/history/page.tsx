@@ -55,7 +55,7 @@ export default async function HistoryPage() {
       ) : (
         <ul className="flex flex-col gap-2.5">
           {rows.map((r) => {
-            const color = r.score >= 65 ? "#2fa66b" : r.score >= 45 ? "#e0902f" : "#d65b58";
+            const color = r.score >= 65 ? "#2e7d5b" : r.score >= 45 ? "#c08a2e" : "#c2564c";
             return (
               <li key={r.id}>
                 <Link href={`/history/${r.id}`} className="flex items-center gap-3.5 rounded-[14px] border border-line bg-surface px-4 py-3.5 hover:border-primary">
