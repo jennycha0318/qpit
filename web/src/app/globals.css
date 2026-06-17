@@ -2,22 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 감탄로드 돋움체 (강원특별자치도 / fonts-archive) */
+/* 온글잎 박다현체(제목) · 온글잎 긍정체(본문) — 눈누(noonnu) webfont via jsDelivr */
 @font-face {
-  font-family: "GamtanRoad Dotum";
-  font-weight: 400;
+  font-family: "Ownglyph ParkDaHyun";
+  font-weight: 400 700;
   font-style: normal;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/fonts-archive/GamtanRoadDotum/GamtanRoadDotum-Regular.woff2") format("woff2"),
-    url("https://cdn.jsdelivr.net/gh/fonts-archive/GamtanRoadDotum/GamtanRoadDotum-Regular.woff") format("woff");
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2") format("woff2");
 }
 @font-face {
-  font-family: "GamtanRoad Dotum";
-  font-weight: 700;
+  font-family: "Ownglyph Positive";
+  font-weight: 400 700;
   font-style: normal;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/fonts-archive/GamtanRoadDotum/GamtanRoadDotum-Bold.woff2") format("woff2"),
-    url("https://cdn.jsdelivr.net/gh/fonts-archive/GamtanRoadDotum/GamtanRoadDotum-Bold.woff") format("woff");
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2604-1@1.1/Ownglyph_positive.woff2") format("woff2");
 }
 
 :root {
@@ -25,7 +23,7 @@
 }
 
 body {
-  font-family: "GamtanRoad Dotum", "Pretendard Variable", Pretendard, -apple-system,
+  font-family: "Ownglyph Positive", "Pretendard Variable", Pretendard, -apple-system,
     BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   color: #2c2f55;
   -webkit-font-smoothing: antialiased;
@@ -41,6 +39,13 @@ body {
     radial-gradient(at 18% 92%, rgba(117, 201, 200, 0.5) 0px, transparent 52%),
     radial-gradient(at 50% 50%, rgba(247, 244, 234, 0.6) 0px, transparent 60%);
   background-attachment: fixed;
+}
+
+/* 제목: 온글잎 박다현체 (본문은 긍정체) */
+h1, h2, h3, h4, .font-title {
+  font-family: "Ownglyph ParkDaHyun", "Ownglyph Positive", "Pretendard Variable", Pretendard,
+    system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  letter-spacing: 0;
 }
 
 @layer components {

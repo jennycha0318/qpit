@@ -39,7 +39,9 @@
 - **입력(`.field-input`)**: `rgba(255,255,255,0.6)` + blur, 포커스 시 primary 보더.
 
 ## 타이포그래피 (결정)
-- **본문/UI: 감탄로드 돋움체(GamtanRoad Dotum)** — `@font-face` CDN 로드(`fonts-archive/GamtanRoadDotum`, Regular 400 / Bold 700), `font-display: swap`.
+- **제목: 온글잎 박다현체(Ownglyph ParkDaHyun)** — `h1~h4`(및 `.font-title`)에 적용. 손글씨체.
+- **본문/UI: 온글잎 긍정체(Ownglyph Positive)** — `body` 기본. 손글씨체.
+- 둘 다 눈누(noonnu) webfont를 `@font-face`로 CDN 로드(`cdn.jsdelivr.net/gh/projectnoonnu/...`, woff2, `font-display: swap`). 단일 마스터라 `font-weight: 400 700` 범위로 선언 → 합성 볼드(faux-bold) 없이 굵기 사용.
 - fallback: `Pretendard, -apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic"`.
 - **한글 줄바꿈은 단어(어절) 단위**: `word-break: keep-all; overflow-wrap: break-word;` (body 전역).
 
@@ -63,7 +65,7 @@
 - [x] 컬러 — 파스텔(라벤더/위스테리아/아쿠아) 메인
 - [x] 글래스모피즘(카드·버튼·탭바·입력)
 - [x] 메시 그라데이션 배경
-- [x] 타이포 — 감탄로드 돋움체 + keep-all
+- [x] 타이포 — 온글잎 박다현체(제목)/긍정체(본문) + keep-all
 - [x] 하단 글래스 탭바(접근성·safe-area)
 - [ ] 모션/마이크로인터랙션 추가 정교화(ux-improvement-backlog 참고)
 - [ ] 일러스트 톤

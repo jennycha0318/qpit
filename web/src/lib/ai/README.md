@@ -1,6 +1,8 @@
-# lib/ai — Claude API 연동 + 프롬프트
+# lib/ai — Claude API 연동 + 프롬프트 (계획 / 미구현)
 
-AI 진단 생성의 LLM 레이어.
+> ⚠️ **현재 미구현(빈 디렉터리).** 현재 MVP는 LLM/AI API를 호출하지 않으며, 진단은 `web/src/lib/diagnose/engine.ts`의 규칙 엔진(결정적)으로 산출된다. 아래는 향후 LLM 레이어 도입 시의 설계 메모다.
+
+AI 진단 생성의 LLM 레이어(계획).
 
 ## 예정 구성
 ```

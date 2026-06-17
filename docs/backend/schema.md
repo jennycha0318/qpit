@@ -76,7 +76,7 @@ PROTECTED = ["/home", "/history", "/profile"]
 | `id` | uuid | `gen_random_uuid()` | PK |
 | `user_id` | uuid | `auth.uid()` | 소유자 (auth.users FK, on delete cascade) |
 | `stage` | text | — | `crush` / `dating` / `breakup` |
-| `score` | int | — | 0–100 타이밍 점수 |
+| `score` | int | — | 타이밍 점수 (엔진이 3–97로 clamp; 컬럼엔 CHECK 제약 없음) |
 | `result` | jsonb | — | 진단 결과 전체 (Diagnosis 객체) |
 | `created_at` | timestamptz | `now()` | 생성 시각 |
 

@@ -6,7 +6,7 @@ create table if not exists public.diagnoses (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   stage text not null,                 -- crush | dating | breakup
-  score int not null,                  -- 0-100
+  score int not null,                  -- 진단 점수 (엔진이 3~97로 clamp; 컬럼엔 CHECK 제약 없음)
   result jsonb not null,               -- 진단 결과 전체 (Diagnosis)
   created_at timestamptz not null default now()
 );
