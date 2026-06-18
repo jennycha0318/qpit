@@ -39,16 +39,30 @@ export async function saveProfile(
 ): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("로그인이 필요해요.");
-  const row: Record<string, unknown> = { id: user.id, updated_at: new Date().toISOString() };
-  if (patch.birthYear !== undefined) row.birth_year = patch.birthYear;
-  if (patch.mbti !== undefined) row.mbti = patch.mbti || null;
-  if (patch.attachment !== undefined) row.attachment = patch.attachment || null;
-  const { error } = await supabase.from("profiles").upsert(row);
-  if (error) throw error;
-  // 메타데이터에도 동기화(폴백·표시용)
+
+  const meta: Record<string, unknown> = {};
+  if (patch.birthYear !== undefined) meta.birth_year = patch.birthYear;
+  if (patch.mbti !== undefined) meta.mbti = patch.mbti || null;
+  if (patch.attachment !== undefined) meta.attachment = patch.attachment || null;
+
+  // 1) 메타데이터 동기화 (즉시 가용·폴백) — profiles 테이블이 없어도 동작
+  let metaOk = false;
   try {
-    await supabase.auth.updateUser({ data: { ...patch.birthYear !== undefined ? { birth_year: patch.birthYear } : {}, ...patch.mbti !== undefined ? { mbti: patch.mbti || null } : {}, ...patch.attachment !== undefined ? { attachment: patch.attachment || null } : {} } });
+    const { error } = await supabase.auth.updateUser({ data: meta });
+    metaOk = !error;
   } catch {
-    // 메타 동기화 실패는 무시(테이블 저장이 우선)
+    metaOk = false;
   }
+
+  // 2) profiles 테이블 저장 (SoT) — 미생성/실패해도 메타데이터로 동작
+  const row: Record<string, unknown> = { id: user.id, updated_at: new Date().toISOString(), ...meta };
+  let tableOk = false;
+  try {
+    const { error } = await supabase.from("profiles").upsert(row);
+    tableOk = !error;
+  } catch {
+    tableOk = false;
+  }
+
+  if (!metaOk && !tableOk) throw new Error("프로필 저장에 실패했어요.");
 }
