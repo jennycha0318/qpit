@@ -26,8 +26,8 @@ export default {
         bad: "#b96b8f",
       },
       fontFamily: {
-        sans: ['"Noto Sans KR"', '"Pretendard Variable"', "Pretendard", "system-ui", "sans-serif"],
-        display: ['"Pretendard Variable"', "Pretendard", "system-ui", "sans-serif"],
+        sans: ['"NanumSquare"', '"Pretendard Variable"', "Pretendard", "system-ui", "sans-serif"],
+        display: ['"YPairingFont"', '"NanumSquare"', "Pretendard Variable", "system-ui", "sans-serif"],
       },
       maxWidth: { app: "480px" },
       backdropBlur: { xs: "2px" },

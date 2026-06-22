@@ -39,9 +39,10 @@
 - **입력(`.field-input`)**: `rgba(255,255,255,0.6)` + blur, 포커스 시 primary 보더.
 
 ## 타이포그래피 (결정)
-- **제목·본문 모두 고딕 — Pretendard** (`h1~h4`·`.font-title` 및 `body`). 손글씨체(온글잎 박다현/긍정)에서 **고딕으로 변경**(2026-06; 진지한 컨설팅 톤·가독성). 루트 18px.
-- Pretendard Variable은 `layout.tsx`의 jsDelivr `<link>`로 로드(별도 @font-face 불필요).
-- fallback: `-apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic"`.
+- **제목: Y페어링체(YPairingFont)** — `h1~h4`·`.font-title`. Bold 단일 마스터를 `@font-face`(눈누 projectnoonnu woff2, `globals.css`)로 로드. 루트 18px.
+- **본문/UI: 나눔스퀘어(NanumSquare)** — `body`. `layout.tsx`의 jsDelivr `<link>`(moonspam/NanumSquare)로 로드.
+- Pretendard는 폴백으로 유지(`layout.tsx` jsDelivr link).
+- fallback: `Pretendard, -apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic"`.
 - **한글 줄바꿈은 단어(어절) 단위**: `word-break: keep-all; overflow-wrap: break-word;` (body 전역).
 
 ## 톤·원칙
@@ -64,7 +65,7 @@
 - [x] 컬러 — 파스텔(라벤더/위스테리아/아쿠아) 메인
 - [x] 글래스모피즘(카드·버튼·탭바·입력)
 - [x] 메시 그라데이션 배경
-- [x] 타이포 — Pretendard 고딕(제목·본문) + keep-all
+- [x] 타이포 — Y페어링체(제목)/나눔스퀘어(본문) + keep-all
 - [x] 하단 글래스 탭바(접근성·safe-area)
 - [ ] 모션/마이크로인터랙션 추가 정교화(ux-improvement-backlog 참고)
 - [ ] 일러스트 톤

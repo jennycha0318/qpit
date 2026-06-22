@@ -2,13 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 제목: Y페어링체 (눈누 projectnoonnu) — Bold 단일 마스터를 400 700에 사용 */
+@font-face {
+  font-family: "YPairingFont";
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2601-4@1.1/YPairingFont-Bd.woff2") format("woff2");
+}
+
 :root {
   color-scheme: light;
   font-size: 18px;
 }
 
 body {
-  font-family: "Noto Sans KR", "Pretendard Variable", Pretendard, -apple-system,
+  font-family: "NanumSquare", "Pretendard Variable", Pretendard, -apple-system,
     BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   color: #2c2f55;
   -webkit-font-smoothing: antialiased;
@@ -34,9 +43,9 @@ body::before {
     radial-gradient(at 50% 50%, rgba(247, 244, 234, 0.6) 0px, transparent 60%);
 }
 
-/* 제목·본문 모두 고딕(Pretendard) */
+/* 제목: Y페어링체 (본문은 나눔스퀘어) */
 h1, h2, h3, h4, .font-title {
-  font-family: "Pretendard Variable", Pretendard, -apple-system, system-ui,
+  font-family: "YPairingFont", "NanumSquare", "Pretendard Variable", Pretendard, system-ui,
     "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 }
 
