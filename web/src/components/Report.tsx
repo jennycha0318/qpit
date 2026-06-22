@@ -115,7 +115,8 @@ export function Report({ d }: { d: Diagnosis }) {
       <section className="mt-7 flex flex-col gap-3.5">
         <p className="text-[12.5px] font-bold uppercase tracking-wide text-muted">근거·참고</p>
 
-        {/* 판단 근거 */}
+        {/* 판단 근거 — 요인이 있을 때만(안전 우회 등 factors 빈 경우 숨김) */}
+        {factors.length > 0 && (
         <div className="card">
           <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-primaryDark">이렇게 판단했어요</p>
           <p className="mb-3 text-[12.5px] leading-relaxed text-muted">점수 계산에 반영된 요인이에요. 당신이 부족하다는 뜻이 아니에요.</p>
@@ -135,6 +136,7 @@ export function Report({ d }: { d: Diagnosis }) {
             })}
           </ul>
         </div>
+        )}
 
         {/* 메시지 — hold(보류·주의)와 msg(예시)를 아이콘·톤으로 시각 구분 */}
         <div className={`card ${d.hold ? "bg-gradient-to-br from-[#faf1f6] to-[#f3e9f0]" : "bg-gradient-to-br from-[#eaeef8] to-[#e7f4f3]"}`}>
