@@ -13,7 +13,7 @@
 
 :root {
   color-scheme: light;
-  font-size: 18px;
+  font-size: 15px; /* 본문/UI 기준 크기 (제목은 고정 px라 영향 없음) */
 }
 
 body {
