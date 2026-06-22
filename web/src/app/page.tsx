@@ -17,21 +17,36 @@ export default async function LandingPage() {
   if (user) redirect("/diagnose"); // redirect는 try 밖 (내부적으로 throw 사용)
 
   return (
-    <div>
-      {/* 히어로 — 로고 + 워드마크 + 태그 */}
-      <div className="mb-5 flex flex-col items-center text-center">
-        <Logo size={64} className="mb-2.5" />
-        <span className="font-display text-[24px] font-bold tracking-tight text-ink">Pacemaker</span>
-        <span className="mt-2 rounded-full bg-primarySoft px-3 py-1 text-[12px] font-bold text-primaryDark">AI 연애 타이밍 컨설팅</span>
+    <div className="relative isolate">
+      {/* 떠다니는 파스텔 글로우 오브 (깊이감) — 랜딩 영역에 클립 */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="pm-float absolute -left-10 top-2 h-40 w-40 rounded-full bg-periwinkle/40 blur-3xl" />
+        <div className="absolute -right-12 top-44 h-48 w-48 rounded-full bg-aqua/30 blur-3xl" />
+        <div className="absolute -bottom-6 left-1/4 h-36 w-36 rounded-full bg-wisteria/25 blur-3xl" />
       </div>
 
-      {/* 헤드라인 — 위스테리아→아쿠아 그라데이션 테두리 글래스 프레임 */}
-      <div className="rounded-[26px] bg-gradient-to-br from-primary to-accent p-[1.5px] shadow-[0_10px_30px_rgba(70,80,130,0.14)]">
-        <div className="rounded-[24.5px] bg-white/75 px-6 py-7 text-center backdrop-blur-xl">
+      {/* 히어로 — 로고(글로우+플로팅) + 워드마크 + 태그 */}
+      <div className="pm-fade-up mb-6 flex flex-col items-center text-center">
+        <div className="pm-float relative">
+          <div className="pointer-events-none absolute inset-0 -z-10 scale-150 rounded-full bg-gradient-to-br from-periwinkle/60 to-aqua/50 blur-2xl" />
+          <Logo size={66} />
+        </div>
+        <span className="mt-3 font-display text-[24px] font-bold tracking-tight text-ink">Pacemaker</span>
+        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primarySoft px-3 py-1 text-[12px] font-bold text-primaryDark">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2l1.9 6.6L20 10l-6.1 1.4L12 18l-1.9-6.6L4 10l6.1-1.4z" />
+          </svg>
+          AI 연애 타이밍 컨설팅
+        </span>
+      </div>
+
+      {/* 헤드라인 — 애니메이션 그라데이션 테두리 글래스 프레임 */}
+      <div className="pm-shimmer-border pm-fade-up rounded-[26px] bg-gradient-to-r from-primary via-accent to-primary p-[2px] shadow-[0_14px_38px_rgba(96,130,188,0.22)]">
+        <div className="rounded-[24px] bg-white/80 px-6 py-7 text-center backdrop-blur-xl">
           <h1 className="text-[30px] font-bold leading-[1.4] tracking-tight">
             연애의 결정적 순간,
             <br />
-            <span className="text-primary">타이밍</span>을 분석해 드립니다
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">타이밍</span>을 분석해 드립니다
           </h1>
           <p className="mt-3 text-[15px] leading-relaxed text-muted">
             내 상황과 상대 성향 데이터를 분석해
@@ -42,7 +57,7 @@ export default async function LandingPage() {
       </div>
 
       {/* 특징 카드 */}
-      <div className="card mt-4">
+      <div className="card pm-fade-up mt-4">
         <p className="mb-3.5 text-[12px] font-bold uppercase tracking-wide text-primaryDark">Pacemaker는 이렇게 도와요</p>
         <ul className="flex flex-col gap-3 text-[14px]">
           {[
@@ -51,7 +66,7 @@ export default async function LandingPage() {
             "실행 타이밍·방법·문구까지 제안",
           ].map((t) => (
             <li key={t} className="flex items-center gap-2.5">
-              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primarySoft text-accent">
+              <span className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-white shadow-[0_2px_6px_rgba(96,130,188,0.35)]">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M5 13l4 4L19 7" />
                 </svg>
@@ -63,7 +78,7 @@ export default async function LandingPage() {
       </div>
 
       {/* CTA */}
-      <Link href="/login" className="btn btn-primary mt-6 block text-center">시작하기</Link>
+      <Link href="/login" className="btn btn-primary pm-fade-up mt-6 block text-center">시작하기</Link>
       <p className="mt-2.5 text-center text-[12px] text-muted">로그인 없이 비회원 진단도 가능해요</p>
     </div>
   );

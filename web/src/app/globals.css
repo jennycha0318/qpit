@@ -97,3 +97,22 @@ h1, h2, h3, h4, .font-title {
     background: rgba(255, 255, 255, 0.85);
   }
 }
+
+/* 랜딩 장식 모션 — 모션 선호 사용자에게만 */
+@keyframes pm-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+@keyframes pm-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pm-shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pm-float { animation: pm-float 4.5s ease-in-out infinite; }
+  .pm-fade-up { animation: pm-fade-up 0.6s ease-out both; }
+  .pm-shimmer-border { background-size: 200% 100%; animation: pm-shimmer 6s linear infinite; }
+}
