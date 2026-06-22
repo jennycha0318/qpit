@@ -26,8 +26,8 @@ export default {
         bad: "#b96b8f",
       },
       fontFamily: {
-        sans: ['"Ownglyph Positive"', "Pretendard Variable", "Pretendard", "system-ui", "sans-serif"],
-        display: ['"Ownglyph ParkDaHyun"', '"Ownglyph Positive"', "Pretendard Variable", "system-ui", "sans-serif"],
+        sans: ['"Pretendard Variable"', "Pretendard", "system-ui", "sans-serif"],
+        display: ['"Pretendard Variable"', "Pretendard", "system-ui", "sans-serif"],
       },
       maxWidth: { app: "480px" },
       backdropBlur: { xs: "2px" },

@@ -30,7 +30,7 @@
 | good / warn / bad | `#4fa3a2` / `#c79a4e` / `#b96b8f` | 점수 구간(≥65 / 45–64 / <45) |
 
 ### 배경 (메시 그라데이션)
-`body`에 5개 `radial-gradient` 오버레이로 드리미 메시 연출(라벤더 좌상 → 페리윙클 우상 → 위스테리아 우하 → 아쿠아 좌하 → 플로럴 중앙), `background-attachment: fixed`.
+5개 `radial-gradient` 오버레이로 드리미 메시 연출(라벤더 좌상 → 페리윙클 우상 → 위스테리아 우하 → 아쿠아 좌하 → 플로럴 중앙). **`body::before`의 `position: fixed` 고정 레이어**로 깔아 모바일 깜빡임/흔들림 방지(`background-attachment: fixed` 미사용). 뷰포트 높이는 `100svh`로 주소창 변화 시 중앙정렬 흔들림 방지.
 
 ## 글래스모피즘 (핵심 질감)
 - **카드(`.card`)**: `rgba(255,255,255,0.55)` + `backdrop-filter: blur(16px)` + `1px` 화이트 보더(`rgba(255,255,255,0.65)`) + soft shadow(`0 8px 30px rgba(70,80,130,.10)`), 라운드 22px.
@@ -39,10 +39,9 @@
 - **입력(`.field-input`)**: `rgba(255,255,255,0.6)` + blur, 포커스 시 primary 보더.
 
 ## 타이포그래피 (결정)
-- **제목: 온글잎 박다현체(Ownglyph ParkDaHyun)** — `h1~h4`(및 `.font-title`)에 적용. 손글씨체.
-- **본문/UI: 온글잎 긍정체(Ownglyph Positive)** — `body` 기본. 손글씨체.
-- 둘 다 눈누(noonnu) webfont를 `@font-face`로 CDN 로드(`cdn.jsdelivr.net/gh/projectnoonnu/...`, woff2, `font-display: swap`). 단일 마스터라 `font-weight: 400 700` 범위로 선언 → 합성 볼드(faux-bold) 없이 굵기 사용.
-- fallback: `Pretendard, -apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic"`.
+- **제목·본문 모두 고딕 — Pretendard** (`h1~h4`·`.font-title` 및 `body`). 손글씨체(온글잎 박다현/긍정)에서 **고딕으로 변경**(2026-06; 진지한 컨설팅 톤·가독성). 루트 18px.
+- Pretendard Variable은 `layout.tsx`의 jsDelivr `<link>`로 로드(별도 @font-face 불필요).
+- fallback: `-apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic"`.
 - **한글 줄바꿈은 단어(어절) 단위**: `word-break: keep-all; overflow-wrap: break-word;` (body 전역).
 
 ## 톤·원칙
@@ -65,7 +64,7 @@
 - [x] 컬러 — 파스텔(라벤더/위스테리아/아쿠아) 메인
 - [x] 글래스모피즘(카드·버튼·탭바·입력)
 - [x] 메시 그라데이션 배경
-- [x] 타이포 — 온글잎 박다현체(제목)/긍정체(본문) + keep-all
+- [x] 타이포 — Pretendard 고딕(제목·본문) + keep-all
 - [x] 하단 글래스 탭바(접근성·safe-area)
 - [ ] 모션/마이크로인터랙션 추가 정교화(ux-improvement-backlog 참고)
 - [ ] 일러스트 톤

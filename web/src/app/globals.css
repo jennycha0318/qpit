@@ -2,37 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 온글잎 박다현체(제목) · 온글잎 긍정체(본문) — 눈누(noonnu) webfont via jsDelivr */
-@font-face {
-  font-family: "Ownglyph ParkDaHyun";
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Ownglyph Positive";
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2604-1@1.1/Ownglyph_positive.woff2") format("woff2");
-}
-
 :root {
   color-scheme: light;
   font-size: 18px;
 }
 
 body {
-  font-family: "Ownglyph Positive", "Pretendard Variable", Pretendard, -apple-system,
+  font-family: "Pretendard Variable", Pretendard, -apple-system,
     BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   color: #2c2f55;
   -webkit-font-smoothing: antialiased;
-  letter-spacing: 0.01em;
   word-break: keep-all;
   overflow-wrap: break-word;
   min-height: 100vh;
-  /* 파스텔 드리미 메시 그라데이션 (Lavender·Periwinkle·Wisteria·Aqua) */
+  min-height: 100svh; /* 모바일 주소창 변화 시 흔들림 방지 */
+  background-color: #eef0fb;
+}
+
+/* 파스텔 메시 그라데이션 — 고정 레이어. background-attachment:fixed 미사용(모바일 깜빡임/흔들림 방지) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   background-color: #eef0fb;
   background-image:
     radial-gradient(at 12% 8%, rgba(222, 217, 226, 0.9) 0px, transparent 50%),
@@ -40,14 +32,12 @@ body {
     radial-gradient(at 78% 82%, rgba(128, 161, 212, 0.55) 0px, transparent 50%),
     radial-gradient(at 18% 92%, rgba(117, 201, 200, 0.5) 0px, transparent 52%),
     radial-gradient(at 50% 50%, rgba(247, 244, 234, 0.6) 0px, transparent 60%);
-  background-attachment: fixed;
 }
 
-/* 제목: 온글잎 박다현체 (본문은 긍정체) */
+/* 제목·본문 모두 고딕(Pretendard) */
 h1, h2, h3, h4, .font-title {
-  font-family: "Ownglyph ParkDaHyun", "Ownglyph Positive", "Pretendard Variable", Pretendard,
-    system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  letter-spacing: 0;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, system-ui,
+    "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 }
 
 @layer components {
