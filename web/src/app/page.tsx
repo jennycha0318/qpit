@@ -29,8 +29,7 @@ export default async function LandingPage() {
         <br />
         성공 확률이 높아지는 <b className="text-ink">타이밍과 행동</b>을 제안
       </p>
-      <Link href="/diagnose" className="btn btn-primary block text-center">무료로 진단 시작 (로그인 없이)</Link>
-      <Link href="/login" className="btn btn-ghost mt-3 block text-center">로그인 · 회원가입</Link>
+      <Link href="/login" className="btn btn-primary block text-center">시작하기</Link>
       <ul className="mt-8 flex flex-col gap-3.5 text-[14px]">
         {[
           "실제 연애 의사결정 패턴을 데이터화",

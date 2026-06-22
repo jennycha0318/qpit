@@ -74,6 +74,11 @@ export default function LoginPage() {
         <Link href="/reset-password" className="font-bold text-primaryDark">비밀번호 찾기</Link>
         <Link href="/signup" className="font-bold text-primaryDark">회원가입</Link>
       </div>
+
+      <div className="mt-6 border-t border-line pt-5">
+        <p className="mb-2 text-center text-[12.5px] text-muted">로그인 없이 먼저 둘러볼 수도 있어요</p>
+        <Link href="/diagnose" className="btn btn-ghost block text-center">비회원으로 진단하기</Link>
+      </div>
     </div>
   );
 }
