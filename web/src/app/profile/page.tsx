@@ -35,6 +35,7 @@ export default async function ProfilePage() {
         <Row k="로그인 방식" v={provider} />
         <Row k="진단 횟수" v={countText} />
       </div>
+      <p className="mb-4 -mt-1.5 px-1 text-[12.5px] text-muted">이름·이메일·로그인 방식은 변경할 수 없어요.</p>
 
       <ProfileEditor />
 
