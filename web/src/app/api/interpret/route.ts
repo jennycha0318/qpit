@@ -6,8 +6,8 @@ import { SURVEYS, STAGE_LABEL, type Stage } from "@/lib/diagnose/survey";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// 모델: 기본 Opus 4.8. 비용을 낮추려면 "claude-sonnet-4-6"(약 1/1.7) 또는 "claude-haiku-4-5"로 교체.
-const MODEL = "claude-opus-4-8";
+// 모델: 기본 Sonnet 4.6. 더 높은 품질은 "claude-opus-4-8", 더 저렴하게는 "claude-haiku-4-5"로 교체.
+const MODEL = "claude-sonnet-4-6";
 
 // 구조화 출력 스키마 — 해석(interpretation)과 문구(message)만. 점수·타이밍은 규칙 엔진이 확정.
 const OUTPUT_SCHEMA = {
