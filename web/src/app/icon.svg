@@ -16,12 +16,12 @@
   </defs>
   <path d="M150 168 L190 200 L168 140 Z" fill="url(#x)"/>
   <circle cx="128" cy="116" r="84" fill="url(#x)"/>
-  <g stroke="#ffffff" stroke-width="22" stroke-linecap="round">
-    <line x1="100" y1="88" x2="156" y2="144"/>
-    <line x1="156" y1="88" x2="100" y2="144"/>
-  </g>
+  <circle cx="128" cy="116" r="32" fill="none" stroke="#ffffff" stroke-width="20"/>
   <path d="M362 168 L322 200 L344 140 Z" fill="url(#c)"/>
   <circle cx="384" cy="116" r="84" fill="url(#c)"/>
-  <polyline points="352,118 378,146 426,92" fill="none" stroke="#ffffff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <g stroke="#ffffff" stroke-width="22" stroke-linecap="round">
+    <line x1="356" y1="90" x2="412" y2="142"/>
+    <line x1="412" y1="90" x2="356" y2="142"/>
+  </g>
   <path d="M256 460 C150 384 96 322 96 268 C96 230 126 206 162 206 C198 206 226 230 256 272 C286 230 314 206 350 206 C386 206 416 230 416 268 C416 322 362 384 256 460 Z" fill="url(#h)"/>
 </svg>

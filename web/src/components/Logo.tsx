@@ -27,17 +27,17 @@ export function Logo({ size = 40, className = "", decorative = false }: { size?:
           <stop offset="1" stopColor="#6cc0bf" />
         </linearGradient>
       </defs>
-      {/* 왼쪽 말풍선 (X) */}
+      {/* 왼쪽 말풍선 (O) */}
       <path d="M150 168 L190 200 L168 140 Z" fill="url(#pmX)" />
       <circle cx="128" cy="116" r="84" fill="url(#pmX)" />
-      <g stroke="#ffffff" strokeWidth="22" strokeLinecap="round">
-        <line x1="100" y1="88" x2="156" y2="144" />
-        <line x1="156" y1="88" x2="100" y2="144" />
-      </g>
-      {/* 오른쪽 말풍선 (체크) */}
+      <circle cx="128" cy="116" r="32" fill="none" stroke="#ffffff" strokeWidth="20" />
+      {/* 오른쪽 말풍선 (X) */}
       <path d="M362 168 L322 200 L344 140 Z" fill="url(#pmCheck)" />
       <circle cx="384" cy="116" r="84" fill="url(#pmCheck)" />
-      <polyline points="352,118 378,146 426,92" fill="none" stroke="#ffffff" strokeWidth="22" strokeLinecap="round" strokeLinejoin="round" />
+      <g stroke="#ffffff" strokeWidth="22" strokeLinecap="round">
+        <line x1="356" y1="90" x2="412" y2="142" />
+        <line x1="412" y1="90" x2="356" y2="142" />
+      </g>
       {/* 하트 */}
       <path d="M256 460 C150 384 96 322 96 268 C96 230 126 206 162 206 C198 206 226 230 256 272 C286 230 314 206 350 206 C386 206 416 230 416 268 C416 322 362 384 256 460 Z" fill="url(#pmHeart)" />
     </svg>

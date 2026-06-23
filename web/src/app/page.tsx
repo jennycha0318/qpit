@@ -17,14 +17,7 @@ export default async function LandingPage() {
   if (user) redirect("/diagnose"); // redirect는 try 밖 (내부적으로 throw 사용)
 
   return (
-    <div className="relative isolate">
-      {/* 떠다니는 파스텔 글로우 오브 (깊이감) — 랜딩 영역에 클립 */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="pm-float absolute -left-10 top-2 h-40 w-40 rounded-full bg-periwinkle/40 blur-3xl" />
-        <div className="absolute -right-12 top-44 h-48 w-48 rounded-full bg-aqua/30 blur-3xl" />
-        <div className="absolute -bottom-6 left-1/4 h-36 w-36 rounded-full bg-wisteria/25 blur-3xl" />
-      </div>
-
+    <div>
       {/* 히어로 — 로고(글로우+플로팅) + 워드마크 + 태그 */}
       <div className="pm-fade-up mb-6 flex flex-col items-center text-center">
         <div className="pm-float relative">
@@ -47,23 +40,18 @@ export default async function LandingPage() {
           <br />
           <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">타이밍</span>을 분석해 드립니다
         </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted">
-          내 상황과 상대 성향 데이터를 분석해
-          <br />
-          성공 확률이 높아지는 <b className="text-ink">타이밍과 행동</b>을 제안
-        </p>
       </div>
 
-      {/* 특징 — 박스 없이 배경에 자연스럽게 */}
-      <div className="pm-fade-up mt-7">
-        <p className="mb-3.5 text-[12px] font-bold uppercase tracking-wide text-primaryDark">Pacemaker는 이렇게 도와요</p>
+      {/* 특징 — 흰 카드, 가운데 정렬 */}
+      <div className="card pm-fade-up mt-6">
+        <p className="mb-3.5 text-center text-[12px] font-bold uppercase tracking-wide text-primaryDark">Pacemaker는 이렇게 도와요</p>
         <ul className="flex flex-col gap-3 text-[14px]">
           {[
             "실제 연애 의사결정 패턴을 데이터화",
             "개인별 성향과 상황에 맞춤화",
             "실행 타이밍·방법·문구까지 제안",
           ].map((t) => (
-            <li key={t} className="flex items-center gap-2.5">
+            <li key={t} className="flex items-center justify-center gap-2.5">
               <span className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-white shadow-[0_2px_6px_rgba(96,130,188,0.35)]">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M5 13l4 4L19 7" />
