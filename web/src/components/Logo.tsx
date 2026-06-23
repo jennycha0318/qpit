@@ -18,13 +18,18 @@ export function Logo({ size = 40, className = "", decorative = false }: { size?:
           <stop offset="0.5" stopColor="#7c9ed4" />
           <stop offset="1" stopColor="#5cc1bf" />
         </linearGradient>
+        <linearGradient id="qpFill" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#cfc7ef" />
+          <stop offset="0.5" stopColor="#bcd0ee" />
+          <stop offset="1" stopColor="#a9e6e2" />
+        </linearGradient>
       </defs>
       {/* 하트 — 금색 외곽선 */}
       <path
         d="M256 205 C228 160 175 150 140 185 C108 217 112 268 150 305 L256 400 L362 305 C400 268 404 217 372 185 C337 150 284 160 256 205 Z"
-        fill="none"
+        fill="url(#qpFill)"
         stroke="url(#qpGrad)"
-        strokeWidth="18"
+        strokeWidth="16"
         strokeLinejoin="round"
         strokeLinecap="round"
       />
