@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { TabBar } from "@/components/TabBar";
 import { SplashScreen } from "@/components/SplashScreen";
@@ -6,6 +6,14 @@ import { SplashScreen } from "@/components/SplashScreen";
 export const metadata: Metadata = {
   title: "큐핏 — AI 연애 타이밍 컨설팅",
   description: "연애의 결정적 순간, 언제·어떻게 행동해야 할지 분석해 드립니다.",
+};
+
+// 모바일 앱처럼 화면 확대/축소(핀치줌·더블탭 줌) 비활성화
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

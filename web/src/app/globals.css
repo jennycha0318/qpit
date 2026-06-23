@@ -26,6 +26,7 @@ body {
   min-height: 100vh;
   min-height: 100svh; /* 모바일 주소창 변화 시 흔들림 방지 */
   background-color: #eef0fb;
+  touch-action: manipulation; /* 더블탭 확대 방지(핀치줌은 viewport에서 제한) */
 }
 
 /* 파스텔 메시 그라데이션 — 고정 레이어. background-attachment:fixed 미사용(모바일 깜빡임/흔들림 방지) */
