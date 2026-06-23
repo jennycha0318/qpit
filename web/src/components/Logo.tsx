@@ -1,4 +1,4 @@
-// 큐핏(Qpit) 로고 — 파스텔 하트 + 금색 활·하트화살(심볼).
+// 큐핏(Qpit) 로고 — 파스텔 하트(심플).
 export function Logo({ size = 40, className = "", decorative = false }: { size?: number; className?: string; decorative?: boolean }) {
   return (
     <svg
@@ -23,34 +23,15 @@ export function Logo({ size = 40, className = "", decorative = false }: { size?:
           <stop offset="0.5" stopColor="#bcd0ee" />
           <stop offset="1" stopColor="#a9e6e2" />
         </linearGradient>
-        <linearGradient id="qpGold" x1="100" y1="170" x2="410" y2="360" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#efd07a" />
-          <stop offset="0.5" stopColor="#d6a93f" />
-          <stop offset="1" stopColor="#b07e1c" />
-        </linearGradient>
       </defs>
-
-      {/* 파스텔 하트 (배경) */}
+      {/* 파스텔 하트 */}
       <path
-        d="M256 150 C210 80 110 70 70 140 C30 205 55 290 130 350 L256 460 L382 350 C457 290 482 205 442 140 C402 70 302 80 256 150 Z"
+        d="M256 448 C120 360 48 280 48 192 C48 130 96 86 156 86 C200 86 234 112 256 150 C278 112 312 86 356 86 C416 86 464 130 464 192 C464 280 392 360 256 448 Z"
         fill="url(#qpFill)"
         stroke="url(#qpGrad)"
         strokeWidth="16"
         strokeLinejoin="round"
         strokeLinecap="round"
-      />
-
-      {/* 활 + 화살 (금색) */}
-      <g stroke="url(#qpGold)" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M170 172 Q100 265 170 358" strokeWidth="14" />
-        <path d="M170 172 L170 358" strokeWidth="7" />
-        <line x1="158" y1="265" x2="392" y2="265" strokeWidth="13" />
-      </g>
-      {/* 화살촉 — 하트 (금색 채움) */}
-      <path
-        d="M408 256 c-5 -10 -20 -7 -20 4 c0 9 13 16 20 22 c7 -6 20 -13 20 -22 c0 -11 -15 -14 -20 -4 Z"
-        fill="url(#qpGold)"
-        transform="rotate(90 408 265)"
       />
     </svg>
   );
