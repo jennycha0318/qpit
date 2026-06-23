@@ -64,14 +64,18 @@ create table if not exists public.diagnosis_chats (
 
 alter table public.diagnosis_chats enable row level security;
 
+-- 정책은 재실행 시 중복 에러가 나므로 drop-if-exists 후 생성(idempotent)
+drop policy if exists "diagnosis_chats_select_own" on public.diagnosis_chats;
 create policy "diagnosis_chats_select_own"
   on public.diagnosis_chats for select
   using (auth.uid() = user_id);
 
+drop policy if exists "diagnosis_chats_insert_own" on public.diagnosis_chats;
 create policy "diagnosis_chats_insert_own"
   on public.diagnosis_chats for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "diagnosis_chats_delete_own" on public.diagnosis_chats;
 create policy "diagnosis_chats_delete_own"
   on public.diagnosis_chats for delete
   using (auth.uid() = user_id);
