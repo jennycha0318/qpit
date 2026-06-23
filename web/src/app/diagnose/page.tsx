@@ -146,7 +146,7 @@ export default function DiagnosePage() {
         if (p) {
           if (p.birthYear) { setMyBirthYear(String(p.birthYear)); setHasProfileBirth(true); }
           if (p.mbti) setMyMbti(p.mbti);
-          if (p.name) setMyName(p.name);
+          setMyName(p.nickname || p.name || ""); // 활동 호칭: 닉네임 우선, 없으면 로그인 이름
           if (p.birthYear) setPhase("stage");
         }
       } catch {

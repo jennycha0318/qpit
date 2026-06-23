@@ -41,7 +41,7 @@ export default function ChatPage() {
         const { data } = await supabase.auth.getUser();
         if (!data?.user) return;
         const p = await getProfile(supabase);
-        if (p?.name) setName(p.name);
+        if (p) setName(p.nickname || p.name || "");
         if (hasHandoff) return; // 결과 핸드오프가 있으면 DB 최근 진단 조회 생략
         const { data: rows } = await supabase
           .from("diagnoses")

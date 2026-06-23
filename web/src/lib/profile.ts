@@ -5,7 +5,8 @@ export interface Profile {
   birthYear: number | null;
   mbti: string | null;
   attachment: string | null;
-  name: string | null;
+  name: string | null;     // 로그인 이름(고정, 변경 불가)
+  nickname: string | null; // 여기서 활동에 쓰는 닉네임(편집 가능)
 }
 
 export async function getProfile(supabase: SupabaseClient): Promise<Profile | null> {
@@ -30,12 +31,13 @@ export async function getProfile(supabase: SupabaseClient): Promise<Profile | nu
     mbti: row?.mbti ?? str(md.mbti),
     attachment: row?.attachment ?? str(md.attachment),
     name: str(md.name),
+    nickname: str(md.nickname),
   };
 }
 
 export async function saveProfile(
   supabase: SupabaseClient,
-  patch: { birthYear?: number | null; mbti?: string | null; attachment?: string | null; name?: string | null },
+  patch: { birthYear?: number | null; mbti?: string | null; attachment?: string | null; nickname?: string | null },
 ): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("로그인이 필요해요.");
@@ -46,9 +48,9 @@ export async function saveProfile(
   if (patch.mbti !== undefined) meta.mbti = patch.mbti || null;
   if (patch.attachment !== undefined) meta.attachment = patch.attachment || null;
 
-  // 메타데이터엔 닉네임(name)도 함께 — profiles 테이블엔 name 컬럼이 없어 메타데이터로만 보관
+  // 닉네임은 metadata.nickname에만 저장(로그인 이름 metadata.name은 절대 건드리지 않음). profiles 테이블엔 컬럼 없음.
   const metaData: Record<string, unknown> = { ...meta };
-  if (patch.name !== undefined) metaData.name = patch.name || null;
+  if (patch.nickname !== undefined) metaData.nickname = patch.nickname || null;
 
   // 1) 메타데이터 동기화 (즉시 가용·폴백) — profiles 테이블이 없어도 동작
   let metaOk = false;

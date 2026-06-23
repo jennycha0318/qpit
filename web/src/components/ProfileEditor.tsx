@@ -15,7 +15,7 @@ const ATTACH = [
 type Status = "loading" | "idle" | "saving" | "saved" | "error";
 
 export function ProfileEditor() {
-  const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [mbti, setMbti] = useState("");
   const [attachment, setAttachment] = useState("");
@@ -23,9 +23,9 @@ export function ProfileEditor() {
   const [showSavedBanner, setShowSavedBanner] = useState(false);
 
   // 로드된 초기값(저장된 상태)을 보관해 dirty 계산에 사용
-  const initialRef = useRef({ name: "", birthYear: "", mbti: "", attachment: "" });
+  const initialRef = useRef({ nickname: "", birthYear: "", mbti: "", attachment: "" });
   const dirty =
-    name !== initialRef.current.name ||
+    nickname !== initialRef.current.nickname ||
     birthYear !== initialRef.current.birthYear ||
     mbti !== initialRef.current.mbti ||
     attachment !== initialRef.current.attachment;
@@ -36,15 +36,15 @@ export function ProfileEditor() {
         const supabase = createClient();
         const p = await getProfile(supabase);
         if (p) {
-          const nm = p.name ?? "";
+          const nm = p.nickname ?? "";
           const by = p.birthYear ? String(p.birthYear) : "";
           const mb = p.mbti ?? "";
           const at = p.attachment ?? "";
-          setName(nm);
+          setNickname(nm);
           setBirthYear(by);
           setMbti(mb);
           setAttachment(at);
-          initialRef.current = { name: nm, birthYear: by, mbti: mb, attachment: at };
+          initialRef.current = { nickname: nm, birthYear: by, mbti: mb, attachment: at };
         }
       } catch {
         // 무시 — 빈 폼으로 시작
@@ -78,13 +78,13 @@ export function ProfileEditor() {
     try {
       const supabase = createClient();
       await saveProfile(supabase, {
-        name: name.trim() || null,
+        nickname: nickname.trim() || null,
         birthYear: birthYear ? Number(birthYear) : null,
         mbti: mbti || null,
         attachment: attachment || null,
       });
       // 저장 성공 — 현재값을 초기값으로 갱신해 dirty 해제
-      initialRef.current = { name, birthYear, mbti, attachment };
+      initialRef.current = { nickname, birthYear, mbti, attachment };
       setStatus("saved");
       setShowSavedBanner(true);
     } catch {
@@ -98,7 +98,7 @@ export function ProfileEditor() {
 
   return (
     <div className="card">
-      <p className="mb-3 text-xs font-bold uppercase tracking-wide text-primaryDark">내 정보 (진단 개인화)</p>
+      <p className="mb-3 text-xs font-bold uppercase tracking-wide text-primaryDark">추가 정보</p>
 
       {showSavedBanner && (
         <div
@@ -113,11 +113,11 @@ export function ProfileEditor() {
       <label className="mb-1.5 block text-[13px] font-bold">닉네임</label>
       <input
         className="field-input mb-3.5"
-        value={name}
+        value={nickname}
         maxLength={20}
-        placeholder="결과에서 불릴 이름"
+        placeholder="여기서 활동할 때 쓸 이름 (로그인 이름과 별개)"
         aria-label="닉네임"
-        onChange={(e) => { setName(e.target.value); touch(); }}
+        onChange={(e) => { setNickname(e.target.value); touch(); }}
       />
 
       <label className="mb-1.5 block text-[13px] font-bold">출생연도</label>

@@ -51,7 +51,7 @@ export default async function HistoryPage() {
           </span>
           <div>
             <p className="text-[15px] font-bold text-ink">아직 진단 기록이 없어요</p>
-            <p className="mt-1 text-[13px] text-muted">첫 한 걸음이 가장 용감해요. 진단하면 결과가 여기에 안전하게 보관돼요.</p>
+            <p className="mt-1 text-[13px] text-muted">진단하면 결과가 여기에 안전하게 보관돼요.</p>
           </div>
           <Link href="/diagnose" className="btn btn-primary mt-1 max-w-[220px]">첫 진단 시작하기</Link>
         </div>

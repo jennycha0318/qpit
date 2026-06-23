@@ -29,13 +29,13 @@ export default async function ProfilePage() {
   return (
     <div className="min-h-[calc(100svh-9rem)]">
       <h2 className="mb-1.5 text-[26px] font-bold tracking-tight">내 프로필</h2>
+      <p className="mb-4 px-1 text-[12.5px] text-muted">이름·이메일·로그인 방식은 변경할 수 없어요.</p>
       <div className="card mb-4">
         <Row k="이름" v={name} />
         <Row k="이메일" v={user?.email ?? "-"} />
         <Row k="로그인 방식" v={provider} />
         <Row k="진단 횟수" v={countText} />
       </div>
-      <p className="mb-4 -mt-1.5 px-1 text-[12.5px] text-muted">이름·이메일·로그인 방식은 변경할 수 없어요.</p>
 
       <ProfileEditor />
 
