@@ -33,6 +33,13 @@ export function Logo({ size = 40, className = "", decorative = false }: { size?:
         strokeLinejoin="round"
         strokeLinecap="round"
       />
+      {/* 대각선 화살 (하트 관통) */}
+      <g stroke="url(#qpGrad)" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="95" y1="385" x2="405" y2="130" />
+        <line x1="76" y1="365" x2="124" y2="413" />
+        <line x1="90" y1="351" x2="138" y2="399" />
+      </g>
+      <path d="M442 100 L423 152 L387 108 Z" fill="url(#qpGrad)" />
     </svg>
   );
 }

@@ -12,4 +12,10 @@
     </linearGradient>
   </defs>
   <path d="M256 448 C120 360 48 280 48 192 C48 130 96 86 156 86 C200 86 234 112 256 150 C278 112 312 86 356 86 C416 86 464 130 464 192 C464 280 392 360 256 448 Z" fill="url(#gf)" stroke="url(#g)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round"/>
+  <g stroke="url(#g)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="95" y1="385" x2="405" y2="130"/>
+    <line x1="76" y1="365" x2="124" y2="413"/>
+    <line x1="90" y1="351" x2="138" y2="399"/>
+  </g>
+  <path d="M442 100 L423 152 L387 108 Z" fill="url(#g)"/>
 </svg>
