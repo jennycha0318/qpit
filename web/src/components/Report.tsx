@@ -1,6 +1,7 @@
 import type { Diagnosis } from "@/lib/diagnose/engine";
 import { CrisisResources, LegalEthicsNotice } from "@/components/SupportNotices";
 import { ShareButton } from "@/components/ShareButton";
+import { AskCupidButton } from "@/components/AskCupidButton";
 import { scoreColor, scoreBadge, toneColor } from "@/lib/diagnose/colors";
 
 export function Report({ d }: { d: Diagnosis }) {
@@ -159,8 +160,15 @@ export function Report({ d }: { d: Diagnosis }) {
 
       </section>
 
+      {/* 이 결과로 큐핏 챗봇 상담 연결 (위기·안전 케이스는 상담 연결을 우선하므로 제외) */}
+      {!d.needsSupport && (
+        <div className="mt-7">
+          <AskCupidButton d={d} />
+        </div>
+      )}
+
       {/* 결과 공유 — 진단 결과·히스토리 상세 양쪽에서 사용 */}
-      <div className="mt-7">
+      <div className="mt-3">
         <ShareButton d={d} />
       </div>
 

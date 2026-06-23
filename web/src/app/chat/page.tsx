@@ -19,8 +19,18 @@ export default function ChatPage() {
   const [name, setName] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
 
-  // 로그인 시: 닉네임 + 최근 진단을 챗봇 컨텍스트로 로드
+  // 컨텍스트 로드: ① 결과 페이지에서 넘어온 handoff 우선(1회 소비) → ② 없으면 로그인 사용자의 최근 진단
   useEffect(() => {
+    let handoff = "";
+    try {
+      handoff = sessionStorage.getItem("qpit:chatContext") || "";
+      if (handoff) {
+        setContext(handoff);
+        sessionStorage.removeItem("qpit:chatContext");
+      }
+    } catch {
+      // 무시
+    }
     (async () => {
       try {
         const supabase = createClient();
@@ -28,6 +38,7 @@ export default function ChatPage() {
         if (!data?.user) return;
         const p = await getProfile(supabase);
         if (p?.name) setName(p.name);
+        if (handoff) return; // 결과 핸드오프가 있으면 DB 최근 진단 조회 생략
         const { data: rows } = await supabase
           .from("diagnoses")
           .select("stage, score, result, created_at")
