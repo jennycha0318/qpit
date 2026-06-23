@@ -160,6 +160,14 @@ export function Report({ d, diagnosisId }: { d: Diagnosis; diagnosisId?: string 
 
       </section>
 
+      {/* 카톡 대화 분석 결과(선택 옵션) */}
+      {d.kakaoAnalysis && (
+        <section className="mt-7">
+          <p className="text-[12.5px] font-bold uppercase tracking-wide text-muted">카톡 대화 분석</p>
+          <div className="card mt-3.5 whitespace-pre-wrap text-[14px] leading-relaxed">{d.kakaoAnalysis}</div>
+        </section>
+      )}
+
       {/* 이 결과로 큐핏 챗봇 상담 연결 (위기·안전 케이스는 상담 연결을 우선하므로 제외) */}
       {!d.needsSupport && (
         <div className="mt-7">

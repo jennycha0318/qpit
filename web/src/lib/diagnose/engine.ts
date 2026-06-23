@@ -23,6 +23,7 @@ export interface Diagnosis {
   needsSupport?: boolean; // 정서 위기 신호 → 상담 연결 노출
   minor?: boolean; // 미성년(10대) → 청소년 눈높이 톤 + 지지 강화
   compat?: Compat; // 성향·궁합 참고 레이어(MBTI·나이차) — 점수 미반영
+  kakaoAnalysis?: string; // 카톡 캡처 분석 결과(선택 옵션) — 점수 미반영
 }
 
 type Map = Record<string, [number, string]>;

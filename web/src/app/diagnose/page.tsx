@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { SURVEYS, type Stage } from "@/lib/diagnose/survey";
 import { diagnose, type Answers, type Diagnosis } from "@/lib/diagnose/engine";
 import { Report } from "@/components/Report";
-import { KakaoAnalysis } from "@/components/KakaoAnalysis";
+import { fileToResized } from "@/lib/image";
 import { YearSelect, MbtiSelect } from "@/components/InfoFields";
 import { getProfile, saveProfile } from "@/lib/profile";
 import { Logo } from "@/components/Logo";
@@ -91,6 +91,7 @@ export default function DiagnosePage() {
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [free, setFree] = useState("");
+  const [kakaoFiles, setKakaoFiles] = useState<{ url: string; file: File }[]>([]); // 카톡 캡처(최대 3)
   const [result, setResult] = useState<Diagnosis | null>(null);
   const [overDiagnose, setOverDiagnose] = useState(false); // S2 같은 stage 24h 내 3회 이상
   const [showOverDiagnose, setShowOverDiagnose] = useState(true); // 안내 닫기
@@ -99,6 +100,7 @@ export default function DiagnosePage() {
   const [savedId, setSavedId] = useState<string | null>(null); // 저장된 진단 row id(채팅 연결용)
   const savingRef = useRef(false);    // 중복 저장(insert) 방지
   const advancingRef = useRef(false); // 설문 빠른 연타 방지
+  const kakaoInputRef = useRef<HTMLInputElement>(null);
 
   // 로그인 유저면 프로필 로드 → 생년 알면 '내 정보' 단계 생략
   // 로그인 + localStorage에 게스트 진단 결과가 있으면: 저장 후 결과 화면으로 복원(우선)
@@ -240,30 +242,50 @@ export default function DiagnosePage() {
 
   // AI 해석·문구 보강 — 점수·타이밍은 규칙 결과 유지. 완료(성공/폴백) 후에만 결과 페이지로 전환.
   async function enrich(d: Diagnosis, s: Stage, merged: Answers) {
-    let dFinal = d;
+    const next: Diagnosis = { ...d };
     const ctrl = new AbortController();
-    const to = setTimeout(() => ctrl.abort(), 25000); // 지연 시 규칙 결과로 진행(무한 대기 방지)
+    const to = setTimeout(() => ctrl.abort(), 35000); // 이미지 분석 포함 시 더 길게(무한 대기 방지)
     try {
-      const res = await fetch("/api/interpret", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stage: s, answers: merged, minor, name: myName || undefined }),
-        signal: ctrl.signal,
-      });
-      if (res.ok) {
-        const data = (await res.json()) as { interpretation?: string; message?: string };
-        const next: Diagnosis = { ...d };
+      // 카톡 캡처 분석(선택) — 위기 케이스 제외. 리사이즈 후 함께 분석.
+      const wantImages = !d.needsSupport && kakaoFiles.length > 0;
+      const imagesPayload = wantImages
+        ? await Promise.all(kakaoFiles.map((p) => fileToResized(p.file))).catch(() => null)
+        : null;
+      const ctx = `점수:${d.score}점(${d.scoreTitle}) / 추천 타이밍:${d.plan?.when ?? ""} / 해석:${(d.reason ?? "").slice(0, 400)}`;
+
+      const [interpretRes, imgRes] = await Promise.all([
+        fetch("/api/interpret", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ stage: s, answers: merged, minor, name: myName || undefined }),
+          signal: ctrl.signal,
+        }).catch(() => null),
+        imagesPayload && imagesPayload.length
+          ? fetch("/api/analyze-images", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ images: imagesPayload, context: ctx }),
+              signal: ctrl.signal,
+            }).catch(() => null)
+          : Promise.resolve(null),
+      ]);
+
+      if (interpretRes && interpretRes.ok) {
+        const data = (await interpretRes.json()) as { interpretation?: string; message?: string };
         if (data.interpretation) next.reason = data.interpretation;
         if (!d.hold && data.message) next.msg = data.message;
-        dFinal = next;
+      }
+      if (imgRes && imgRes.ok) {
+        const data = (await imgRes.json()) as { analysis?: string };
+        if (data.analysis) next.kakaoAnalysis = data.analysis;
       }
     } catch {
       // 폴백: 규칙 결과 그대로
     } finally {
       clearTimeout(to);
-      setResult(dFinal);
+      setResult(next);
       setPhase("result");
-      saveDiagnosis(dFinal, s);
+      saveDiagnosis(next, s);
     }
   }
 
@@ -295,14 +317,14 @@ export default function DiagnosePage() {
   }
 
   function pickStage(s: Stage) {
-    setStage(s); setAnswers({}); setQIndex(0); setFree("");
+    setStage(s); setAnswers({}); setQIndex(0); setFree(""); setKakaoFiles([]);
     setPartnerBirthYear(""); setPartnerMbti(""); setPartnerNote("");
     setPhase("partner");
   }
 
   function reset() {
     setPhase("stage"); setAnswers({}); setQIndex(0); setResult(null);
-    setFree(""); setSaveStatus("idle"); setPartnerBirthYear(""); setPartnerMbti(""); setPartnerNote(""); setSavedId(null);
+    setFree(""); setKakaoFiles([]); setSaveStatus("idle"); setPartnerBirthYear(""); setPartnerMbti(""); setPartnerNote(""); setSavedId(null);
   }
 
   // ── 프로필 로딩 중 ──
@@ -447,7 +469,6 @@ export default function DiagnosePage() {
         )}
 
         <Report d={result} diagnosisId={savedId ?? undefined} />
-        {!result.needsSupport && <KakaoAnalysis d={result} />}
         <button className="btn btn-ghost mt-5" onClick={reset}>다시 진단하기</button>
         {saveStatus === "guest" && (
           <Link href="/" className="btn btn-ghost mt-3 block text-center">처음으로</Link>
@@ -456,10 +477,11 @@ export default function DiagnosePage() {
     );
   }
 
-  // ── 설문 ──
+  // ── 설문 (마지막 단계는 카톡 캡처 분석(선택) = N/N) ──
   const survey = SURVEYS[stage];
+  const total = survey.length + 1;
+  const isImageStep = qIndex >= survey.length;
   const q = survey[qIndex];
-  const total = survey.length;
 
   return (
     <div className="min-h-[calc(100svh-9rem)]">
@@ -471,36 +493,77 @@ export default function DiagnosePage() {
           style={{ width: `${((qIndex + 1) / total) * 100}%` }} />
       </div>
       <p className="mb-2.5 text-[13px] font-bold text-primaryDark">질문 {qIndex + 1} / {total}</p>
-      <h2 className="mb-6 text-[25px] font-bold leading-snug tracking-tight">{q.title}</h2>
 
-      {q.type === "text" ? (
+      {isImageStep ? (
         <div>
-          {q.desc && <p className="-mt-2 mb-3.5 text-sm text-muted">{q.desc}</p>}
+          <h2 className="mb-2 text-[25px] font-bold leading-snug tracking-tight">카톡 대화도 분석해볼까요?</h2>
+          <p className="mb-4 text-sm leading-relaxed text-muted">
+            상대와의 카톡 캡처(최대 3장)를 올리면 상대의 관심도·온도·연락 패턴을 함께 분석해 드려요.{" "}
+            <b className="text-primaryDark">추가 분석(유료 예정)</b> · 캡처 없이 진단해도 돼요.
+          </p>
+          <input
+            ref={kakaoInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            aria-label="카톡 캡처 선택"
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []).slice(0, 3);
+              setKakaoFiles(files.map((file) => ({ url: URL.createObjectURL(file), file })));
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => kakaoInputRef.current?.click()}
+            className="w-full rounded-2xl border border-dashed border-accent/50 bg-white/50 py-4 text-sm font-bold text-primaryDark transition active:scale-[0.98] hover:bg-white/70"
+          >
+            캡처 선택 (최대 3장)
+          </button>
+          {kakaoFiles.length > 0 && (
+            <div className="mt-3 flex gap-2">
+              {kakaoFiles.map((p, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={p.url} alt={`캡처 ${i + 1}`} className="h-16 w-16 rounded-lg border border-line object-cover" />
+              ))}
+            </div>
+          )}
+          <button className="btn btn-primary mt-4" onClick={() => finish({ ...answers, freeText: free })}>
+            {kakaoFiles.length > 0 ? `진단하기 (캡처 ${kakaoFiles.length}장 포함)` : "진단하기"}
+          </button>
+        </div>
+      ) : q.type === "text" ? (
+        <div>
+          <h2 className="mb-6 text-[25px] font-bold leading-snug tracking-tight">{q.title}</h2>
+          {q.desc && <p className="-mt-4 mb-3.5 text-sm text-muted">{q.desc}</p>}
           <textarea className="field-input min-h-[140px] resize-y leading-relaxed" placeholder={q.placeholder}
             aria-label={q.title} value={free} onChange={(e) => setFree(e.target.value)} />
-          <button className="btn btn-primary mt-3.5" onClick={() => finish({ ...answers, freeText: free })}>진단하기</button>
+          <button className="btn btn-primary mt-3.5" onClick={() => setQIndex(qIndex + 1)}>다음</button>
         </div>
       ) : (
-        <div className="flex flex-col gap-2.5">
-          {q.options!.map((opt) => {
-            const selected = answers[q.id] === opt.v;
-            return (
-              <button key={opt.v} onClick={() => selectOption(q.id, opt.v)} aria-pressed={selected}
-                className={`flex items-start justify-between gap-3 rounded-[14px] border p-4 text-left text-base backdrop-blur transition active:scale-[0.99] ${
-                  selected ? "border-primary bg-primarySoft font-bold ring-1 ring-primary/40" : "border-white/60 bg-white/60 hover:border-primary"
-                }`}>
-                <span>
-                  {opt.label}
-                  {opt.note && <span className="mt-0.5 block text-xs font-normal text-muted">{opt.note}</span>}
-                </span>
-                {selected && (
-                  <span className="mt-0.5 flex items-center gap-1 text-[12.5px] font-bold text-primaryDark">
-                    <CheckIcon />선택됨
+        <div>
+          <h2 className="mb-6 text-[25px] font-bold leading-snug tracking-tight">{q.title}</h2>
+          <div className="flex flex-col gap-2.5">
+            {q.options!.map((opt) => {
+              const selected = answers[q.id] === opt.v;
+              return (
+                <button key={opt.v} onClick={() => selectOption(q.id, opt.v)} aria-pressed={selected}
+                  className={`flex items-start justify-between gap-3 rounded-[14px] border p-4 text-left text-base backdrop-blur transition active:scale-[0.99] ${
+                    selected ? "border-primary bg-primarySoft font-bold ring-1 ring-primary/40" : "border-white/60 bg-white/60 hover:border-primary"
+                  }`}>
+                  <span>
+                    {opt.label}
+                    {opt.note && <span className="mt-0.5 block text-xs font-normal text-muted">{opt.note}</span>}
                   </span>
-                )}
-              </button>
-            );
-          })}
+                  {selected && (
+                    <span className="mt-0.5 flex items-center gap-1 text-[12.5px] font-bold text-primaryDark">
+                      <CheckIcon />선택됨
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
