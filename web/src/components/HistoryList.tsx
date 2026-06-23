@@ -167,7 +167,7 @@ export function HistoryList({
                       {chat && (
                         <Link
                           href={`/history/${r.id}/chat`}
-                          className="flex items-center gap-2.5 rounded-[18px] border border-accent/30 bg-accent/5 py-3.5 pl-4 pr-3 backdrop-blur transition active:scale-[0.98] hover:border-accent"
+                          className="flex items-center gap-2.5 rounded-[18px] border border-accent/30 bg-accent/10 py-3.5 pl-4 pr-3 backdrop-blur transition active:scale-[0.98] hover:border-accent"
                         >
                           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent/15 text-accent">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
