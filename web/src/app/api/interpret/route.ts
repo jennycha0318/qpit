@@ -6,8 +6,8 @@ import { SURVEYS, STAGE_LABEL, type Stage } from "@/lib/diagnose/survey";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// 모델: 기본 Sonnet 4.6. 더 높은 품질은 "claude-opus-4-8", 더 저렴하게는 "claude-haiku-4-5"로 교체.
-const MODEL = "claude-sonnet-4-6";
+// 모델: 결과 해석은 Opus 4.8(고품질). 챗봇(추후)은 별도로 Sonnet 4.6 사용 예정.
+const MODEL = "claude-opus-4-8";
 
 // 구조화 출력 스키마 — 해석(interpretation)과 문구(message)만. 점수·타이밍은 규칙 엔진이 확정.
 const OUTPUT_SCHEMA = {
@@ -63,6 +63,7 @@ const SYSTEM_PROMPT = `당신은 한국어로 답하는 'AI 연애 컨설턴트'
 [제약]
 - 점수·타이밍·추천행동·주의사항은 이미 '규칙 엔진'이 확정했습니다. 당신은 그 결과와 '일관된' 해석·문구만 만드세요. 점수나 타이밍을 새로 판단하거나 뒤집지 마세요.
 - 의료·법률·투자 등 전문 조언은 하지 마세요.
+- 사용자를 지칭할 때는 사용자 메시지의 '[사용자 호칭]'에 주어진 호칭(예: "민지님이" 또는 "당신이")만 사용하고, '너·네가' 같은 반말 호칭은 절대 쓰지 마세요.
 - 미성년(minor)이면 더 따뜻하고 지지적인 눈높이로, 자극적·선정적 표현 없이. 필요하면 신뢰할 수 있는 어른·상담을 권할 수 있어요.
 
 [출력]
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
   let stage: Stage;
   let answers: Answers;
   let minor = false;
+  let name = "";
   try {
     const body = await req.json();
     if (!isStage(body?.stage)) {
@@ -82,6 +84,7 @@ export async function POST(req: Request) {
     stage = body.stage;
     answers = (body.answers ?? {}) as Answers;
     minor = !!body.minor;
+    name = typeof body.name === "string" ? body.name.trim().slice(0, 40) : "";
   } catch {
     return NextResponse.json({ error: "bad request" }, { status: 400 });
   }
@@ -98,9 +101,11 @@ export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) return fallback(d);
 
   const wantMessage = !d.hold; // 보류(지금 연락 권장 안 함) 케이스는 문구 생성 안 함
+  const honorific = name ? `${name}님` : "당신"; // 결과에서 사용자를 부를 호칭
 
   const userText = [
     `[상황] ${STAGE_LABEL[stage]}`,
+    `[사용자 호칭] ${honorific} — 해석·문구에서 사용자를 부를 땐 반드시 "${honorific}이/가" 형태로만 쓰고, '너·네가' 같은 반말은 쓰지 마세요.`,
     `[설문 응답]\n${readableSummary(stage, answers)}`,
     `[사용자가 직접 적은 상황]\n${(answers.freeText || "").trim() || "(없음)"}`,
     `[참고(점수 미반영)] 내 MBTI: ${answers.myMbti || "미입력"}, 상대 MBTI: ${answers.partnerMbti || "미입력"}`,

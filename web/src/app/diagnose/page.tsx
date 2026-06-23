@@ -8,6 +8,7 @@ import { diagnose, type Answers, type Diagnosis } from "@/lib/diagnose/engine";
 import { Report } from "@/components/Report";
 import { YearSelect, MbtiSelect } from "@/components/InfoFields";
 import { getProfile, saveProfile } from "@/lib/profile";
+import { Logo } from "@/components/Logo";
 
 const STAGES: { v: Stage; name: string; note: string }[] = [
   { v: "crush", name: "썸 타는 중", note: "고백 타이밍이 고민돼요" },
@@ -16,8 +17,12 @@ const STAGES: { v: Stage; name: string; note: string }[] = [
   { v: "breakup", name: "이별 후", note: "재회하고 싶어요" },
 ];
 
-type Phase = "me" | "stage" | "partner" | "survey" | "result";
+type Phase = "me" | "stage" | "partner" | "survey" | "analyzing" | "result";
 type SaveStatus = "idle" | "saving" | "saved" | "error" | "guest";
+
+// 뒤로가기 버튼 공통 스타일 — 설문 '이전' 버튼과 위치·모양 통일(스텝 표시 아래, 글래스 알약)
+const BACK_BTN =
+  "inline-block rounded-full bg-white/55 px-3 py-1.5 text-sm font-bold text-primaryDark backdrop-blur transition active:scale-95 hover:bg-white/75";
 
 // 게스트 진단 결과 임시 보존 키(가입/로그인 직후 /diagnose 재진입 시 복원·저장)
 const PENDING_KEY = "pacemaker:pendingDiagnosis";
@@ -77,6 +82,7 @@ export default function DiagnosePage() {
   const [hasProfileBirth, setHasProfileBirth] = useState(false); // 로그인+생년 있으면 '내 정보' 단계 생략
   const [myBirthYear, setMyBirthYear] = useState("");
   const [myMbti, setMyMbti] = useState("");
+  const [myName, setMyName] = useState(""); // 로그인 사용자 닉네임(결과 호칭용)
   const [stage, setStage] = useState<Stage>("crush");
   const [partnerBirthYear, setPartnerBirthYear] = useState("");
   const [partnerMbti, setPartnerMbti] = useState("");
@@ -88,7 +94,6 @@ export default function DiagnosePage() {
   const [showOverDiagnose, setShowOverDiagnose] = useState(true); // 안내 닫기
   const [blockedBypass, setBlockedBypass] = useState(false); // S3 차단 우회 경고
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
-  const [aiLoading, setAiLoading] = useState(false); // AI 해석·문구 보강 진행 중
   const savingRef = useRef(false);    // 중복 저장(insert) 방지
   const advancingRef = useRef(false); // 설문 빠른 연타 방지
 
@@ -136,6 +141,7 @@ export default function DiagnosePage() {
         if (p) {
           if (p.birthYear) { setMyBirthYear(String(p.birthYear)); setHasProfileBirth(true); }
           if (p.mbti) setMyMbti(p.mbti);
+          if (p.name) setMyName(p.name);
           if (p.birthYear) setPhase("stage");
         }
       } catch {
@@ -225,20 +231,21 @@ export default function DiagnosePage() {
     }
     setBlockedBypass(bypass);
 
-    setResult(d);
-    setPhase("result");
-    enrich(d, s, merged); // 결과는 즉시 표시, AI 해석·문구 보강 후 저장
+    setPhase("analyzing"); // '분석 중' 화면 표시 → AI 보강 완료 후 결과 전환
+    enrich(d, s, merged);
   }
 
-  // AI 해석·문구 보강 — 점수·타이밍은 규칙 결과 유지. 실패/키 미설정 시 규칙 결과로 폴백.
+  // AI 해석·문구 보강 — 점수·타이밍은 규칙 결과 유지. 완료(성공/폴백) 후에만 결과 페이지로 전환.
   async function enrich(d: Diagnosis, s: Stage, merged: Answers) {
-    setAiLoading(true);
     let dFinal = d;
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 25000); // 지연 시 규칙 결과로 진행(무한 대기 방지)
     try {
       const res = await fetch("/api/interpret", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stage: s, answers: merged, minor }),
+        body: JSON.stringify({ stage: s, answers: merged, minor, name: myName || undefined }),
+        signal: ctrl.signal,
       });
       if (res.ok) {
         const data = (await res.json()) as { interpretation?: string; message?: string };
@@ -246,12 +253,13 @@ export default function DiagnosePage() {
         if (data.interpretation) next.reason = data.interpretation;
         if (!d.hold && data.message) next.msg = data.message;
         dFinal = next;
-        setResult(next);
       }
     } catch {
       // 폴백: 규칙 결과 그대로
     } finally {
-      setAiLoading(false);
+      clearTimeout(to);
+      setResult(dFinal);
+      setPhase("result");
       saveDiagnosis(dFinal, s);
     }
   }
@@ -303,9 +311,9 @@ export default function DiagnosePage() {
   if (phase === "me") {
     return (
       <div className="min-h-[calc(100svh-9rem)]">
-        <Link href="/" className="text-sm text-muted">← 처음으로</Link>
         <StepIndicator phase="me" meDone={hasProfileBirth} />
-        <h2 className="mb-6 mt-2 text-[26px] font-bold tracking-tight">먼저, 당신에 대해 알려주세요</h2>
+        <Link href="/" className={BACK_BTN}>← 처음으로</Link>
+        <h2 className="mb-6 mt-3 text-[26px] font-bold tracking-tight">먼저, 당신에 대해 알려주세요</h2>
 
         <label className="mb-1.5 block text-[13px] font-bold">출생연도</label>
         <div className="mb-4"><YearSelect value={myBirthYear} onChange={setMyBirthYear} ariaLabel="내 출생연도" /></div>
@@ -323,11 +331,11 @@ export default function DiagnosePage() {
   if (phase === "stage") {
     return (
       <div className="min-h-[calc(100svh-9rem)]">
-        {hasProfileBirth
-          ? <Link href="/" className="text-sm text-muted">← 처음으로</Link>
-          : <button onClick={() => setPhase("me")} className="text-sm text-muted">← 내 정보</button>}
         <StepIndicator phase="stage" meDone={hasProfileBirth} />
-        <h2 className="mb-6 mt-2 text-[26px] font-bold tracking-tight">지금 어떤 상황인가요?</h2>
+        {hasProfileBirth
+          ? <Link href="/" className={BACK_BTN}>← 처음으로</Link>
+          : <button onClick={() => setPhase("me")} className={BACK_BTN}>← 내 정보</button>}
+        <h2 className="mb-6 mt-3 text-[26px] font-bold tracking-tight">지금 어떤 상황인가요?</h2>
         <div className="flex flex-col gap-3.5">
           {STAGES.map((s) => (
             <button key={s.v} onClick={() => pickStage(s.v)}
@@ -340,9 +348,6 @@ export default function DiagnosePage() {
             </button>
           ))}
         </div>
-        {minor && (
-          <p className="mt-6 text-center text-[12.5px] text-muted">편하게 골라줘요. 정답은 없어요.</p>
-        )}
       </div>
     );
   }
@@ -351,9 +356,9 @@ export default function DiagnosePage() {
   if (phase === "partner") {
     return (
       <div className="min-h-[calc(100svh-9rem)]">
-        <button onClick={() => setPhase("stage")} className="text-sm text-muted">← 상황</button>
         <StepIndicator phase="partner" meDone={hasProfileBirth} />
-        <h2 className="mb-6 mt-2 text-[26px] font-bold tracking-tight">상대에 대해 아는 게 있나요?</h2>
+        <button onClick={() => setPhase("stage")} className={BACK_BTN}>← 상황</button>
+        <h2 className="mb-6 mt-3 text-[26px] font-bold tracking-tight">상대에 대해 아는 게 있나요?</h2>
 
         <label className="mb-1.5 block text-[13px] font-bold">상대 출생연도 <span className="font-normal text-muted">(선택)</span></label>
         <div className="mb-4"><YearSelect value={partnerBirthYear} onChange={setPartnerBirthYear} ariaLabel="상대 출생연도" /></div>
@@ -367,11 +372,21 @@ export default function DiagnosePage() {
     );
   }
 
+  // ── 분석 중 (AI 해석·문구 완료까지) ──
+  if (phase === "analyzing") {
+    return (
+      <div className="flex min-h-[calc(100svh-9rem)] flex-col items-center justify-center gap-4 text-center">
+        <div className="pm-bounce"><Logo size={72} decorative /></div>
+        <p className="text-lg font-bold text-ink">결과를 분석하고 있어요</p>
+        <p className="text-sm leading-relaxed text-muted">상황에 맞는 해석과 제안을 준비하는 중이에요.<br />잠시만 기다려 주세요…</p>
+      </div>
+    );
+  }
+
   // ── 결과 ──
   if (phase === "result" && result) {
     return (
       <div>
-        {aiLoading && <p className="mb-3 text-center text-xs text-primaryDark">AI가 해석·문구를 다듬는 중…</p>}
         {saveStatus === "saving" && <p className="mb-3 text-center text-xs text-muted">결과 저장 중…</p>}
         {saveStatus === "saved" && <p className="mb-3 text-center text-xs text-good">히스토리에 저장됨</p>}
         {saveStatus === "error" && (
@@ -437,8 +452,7 @@ export default function DiagnosePage() {
   return (
     <div className="min-h-[calc(100svh-9rem)]">
       <StepIndicator phase="survey" meDone={hasProfileBirth} />
-      <button onClick={() => (qIndex > 0 ? setQIndex(qIndex - 1) : setPhase("partner"))}
-        className="rounded-full bg-white/55 px-3 py-1.5 text-sm font-bold text-primaryDark backdrop-blur transition active:scale-95 hover:bg-white/75">← 이전</button>
+      <button onClick={() => (qIndex > 0 ? setQIndex(qIndex - 1) : setPhase("partner"))} className={BACK_BTN}>← 이전</button>
       <div className="my-3 h-1.5 overflow-hidden rounded-full bg-line"
         role="progressbar" aria-label="설문 진행률" aria-valuemin={0} aria-valuemax={total} aria-valuenow={qIndex + 1}>
         <div className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-500 ease-out"
