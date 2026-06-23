@@ -34,14 +34,6 @@ export default async function HistoryDetailPage({
   // 필수 필드 누락(깨진 데이터)이면 Report 크래시 대신 404
   if (typeof d.score !== "number" || !d.plan || !Array.isArray(d.factors)) notFound();
 
-  // 이 진단에 대한 상담(챗봇) 기록 — 테이블/권한 없으면 null → 조용히 미표시
-  const { data: chats } = await supabase
-    .from("diagnosis_chats")
-    .select("q, a, created_at")
-    .eq("diagnosis_id", id)
-    .order("created_at", { ascending: true });
-  const chatList = (chats ?? []) as { q: string; a: string; created_at: string }[];
-
   return (
     <div>
       <div className="flex items-center justify-between gap-2">
@@ -52,26 +44,6 @@ export default async function HistoryDetailPage({
         {STAGE_LABEL[data.stage as Stage] ?? "진단"} · {fmt(data.created_at as string)}
       </p>
       <Report d={d} diagnosisId={id} />
-
-      {chatList.length > 0 && (
-        <section className="mt-7">
-          <p className="mb-3 text-[12.5px] font-bold uppercase tracking-wide text-muted">상담 기록</p>
-          <div className="flex flex-col gap-3">
-            {chatList.map((c, i) => (
-              <div key={i} className="card">
-                <p className="mb-2 flex gap-1.5 text-[13.5px]">
-                  <span className="font-bold text-primaryDark">Q.</span>
-                  <span>{c.q}</span>
-                </p>
-                <p className="flex gap-1.5 text-[14px]">
-                  <span className="font-bold text-accent">A.</span>
-                  <span className="whitespace-pre-wrap leading-relaxed">{c.a}</span>
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }

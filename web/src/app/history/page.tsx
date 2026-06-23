@@ -4,6 +4,13 @@ import { HistoryList, type Row } from "@/components/HistoryList";
 
 export const dynamic = "force-dynamic";
 
+function fmtKST(ts: string) {
+  return new Date(ts).toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
+  });
+}
+
 export default async function HistoryPage() {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -22,6 +29,13 @@ export default async function HistoryPage() {
     );
   }
   const rows = (data ?? []) as Row[];
+
+  // 상담(챗봇) 기록 — 히스토리 탭에 함께 표시. 테이블/권한 없으면 null → 조용히 미표시.
+  const { data: chatData } = await supabase
+    .from("diagnosis_chats")
+    .select("id, q, a, created_at")
+    .order("created_at", { ascending: false });
+  const chats = (chatData ?? []) as { id: string; q: string; a: string; created_at: string }[];
 
   return (
     <div>
@@ -43,6 +57,28 @@ export default async function HistoryPage() {
         </div>
       ) : (
         <HistoryList rows={rows} />
+      )}
+
+      {chats.length > 0 && (
+        <section className="mt-8">
+          <h3 className="mb-1.5 text-[18px] font-bold tracking-tight">상담 기록</h3>
+          <p className="mb-4 text-sm text-muted">큐핏과 나눈 대화예요.</p>
+          <div className="flex flex-col gap-2.5">
+            {chats.map((c) => (
+              <div key={c.id} className="card">
+                <p className="mb-2 flex gap-1.5 text-[13.5px]">
+                  <span className="font-bold text-primaryDark">Q.</span>
+                  <span>{c.q}</span>
+                </p>
+                <p className="flex gap-1.5 text-[14px]">
+                  <span className="font-bold text-accent">A.</span>
+                  <span className="whitespace-pre-wrap leading-relaxed">{c.a}</span>
+                </p>
+                <p className="mt-2 text-right text-[11.5px] text-muted">{fmtKST(c.created_at)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );
