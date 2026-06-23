@@ -315,9 +315,7 @@ export default function DiagnosePage() {
     return (
       <div className="min-h-[calc(100svh-9rem)]">
         <StepIndicator phase="me" meDone={hasProfileBirth} />
-        {hasProfileBirth
-          ? <button onClick={() => setPhase("stage")} className={BACK_BTN}>← 상황</button>
-          : <Link href="/" className={BACK_BTN}>← 처음으로</Link>}
+        {!hasProfileBirth && <Link href="/" className={BACK_BTN}>← 처음으로</Link>}
         <h2 className="mb-6 mt-3 text-[26px] font-bold tracking-tight">먼저, 당신에 대해 알려주세요</h2>
 
         <label className="mb-1.5 block text-[13px] font-bold">출생연도</label>
