@@ -1,27 +1,16 @@
-<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pacemaker">
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="큐핏">
   <defs>
-    <linearGradient id="h" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#c0b9dd"/>
-      <stop offset="0.55" stop-color="#80a1d4"/>
-      <stop offset="1" stop-color="#75c9c8"/>
-    </linearGradient>
-    <linearGradient id="x" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#c0b9dd"/>
-      <stop offset="1" stop-color="#7e9fd2"/>
-    </linearGradient>
-    <linearGradient id="c" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#80a1d4"/>
-      <stop offset="1" stop-color="#6cc0bf"/>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f3d684"/>
+      <stop offset="0.5" stop-color="#d9b44a"/>
+      <stop offset="1" stop-color="#b07e1c"/>
     </linearGradient>
   </defs>
-  <path d="M150 168 L190 200 L168 140 Z" fill="url(#x)"/>
-  <circle cx="128" cy="116" r="84" fill="url(#x)"/>
-  <circle cx="128" cy="116" r="32" fill="none" stroke="#ffffff" stroke-width="20"/>
-  <path d="M362 168 L322 200 L344 140 Z" fill="url(#c)"/>
-  <circle cx="384" cy="116" r="84" fill="url(#c)"/>
-  <g stroke="#ffffff" stroke-width="22" stroke-linecap="round">
-    <line x1="356" y1="90" x2="412" y2="142"/>
-    <line x1="412" y1="90" x2="356" y2="142"/>
+  <path d="M256 205 C228 160 175 150 140 185 C108 217 112 268 150 305 L256 400 L362 305 C400 268 404 217 372 185 C337 150 284 160 256 205 Z" fill="none" stroke="url(#g)" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+  <g stroke="url(#g)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="95" y1="415" x2="420" y2="175"/>
+    <line x1="70" y1="388" x2="140" y2="448"/>
+    <line x1="98" y1="368" x2="168" y2="428"/>
   </g>
-  <path d="M256 460 C150 384 96 322 96 268 C96 230 126 206 162 206 C198 206 226 230 256 272 C286 230 314 206 350 206 C386 206 416 230 416 268 C416 322 362 384 256 460 Z" fill="url(#h)"/>
+  <path d="M455 150 L429 206 L394 158 Z" fill="url(#g)"/>
 </svg>

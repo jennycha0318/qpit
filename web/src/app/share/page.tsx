@@ -14,7 +14,7 @@ function CTAs() {
         나도 무료로 진단받기
       </Link>
       <Link href="/" className="btn btn-ghost mt-3 flex items-center justify-center">
-        Pacemaker 알아보기
+        큐핏 알아보기
       </Link>
     </>
   );

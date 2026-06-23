@@ -46,7 +46,7 @@ export default function LoginPage() {
     <div className="pt-4">
       <BrandLockup size={30} className="mb-6" />
       <h2 className="mb-1.5 text-[30px] font-bold tracking-tight">로그인</h2>
-      <p className="mb-6 text-sm text-muted">Pacemaker에 오신 걸 환영해요.</p>
+      <p className="mb-6 text-sm text-muted">큐핏에 오신 걸 환영해요.</p>
 
       <GoogleButton />
       <div className="my-[18px] flex items-center gap-3 text-xs text-muted before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line">

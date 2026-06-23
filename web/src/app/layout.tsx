@@ -3,7 +3,7 @@ import "./globals.css";
 import { TabBar } from "@/components/TabBar";
 
 export const metadata: Metadata = {
-  title: "Pacemaker — AI 연애 컨설팅",
+  title: "큐핏 — AI 연애 타이밍 컨설팅",
   description: "연애의 결정적 순간, 언제·어떻게 행동해야 할지 분석해 드립니다.",
 };
 

@@ -13,7 +13,7 @@ export function ShareButton({ d }: { d: Diagnosis }) {
       const url = `${window.location.origin}/share?d=${encodeURIComponent(JSON.stringify(payload))}`;
 
       if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: "Pacemaker", text: "Pacemaker를 통해 공유한 내용 보러가기", url });
+        await navigator.share({ title: "큐핏", text: "큐핏을 통해 공유한 내용 보러가기", url });
         return;
       }
       if (typeof navigator !== "undefined" && navigator.clipboard) {

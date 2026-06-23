@@ -1,4 +1,4 @@
-# Pacemaker Web — 셋업 가이드
+# 큐핏(Qpit) Web — 셋업 가이드
 
 Next.js 15 + Supabase(Auth + DB) MVP. 아래 순서대로 하면 로컬에서 동작합니다.
 

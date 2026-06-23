@@ -1,6 +1,6 @@
 # Web — Next.js + Supabase 앱
 
-Pacemaker 실제 제품. **Next.js 15 (App Router, TS, Tailwind) + Supabase (Auth + DB)**.
+큐핏(Qpit) 실제 제품. **Next.js 15 (App Router, TS, Tailwind) + Supabase (Auth + DB)**.
 
 👉 **셋업/실행은 [SETUP.md](SETUP.md) 참고** (Supabase 키 + 스키마 + 구글 OAuth)
 
