@@ -105,7 +105,7 @@ export async function POST(req: Request) {
 
   const userText = [
     `[상황] ${STAGE_LABEL[stage]}`,
-    `[사용자 호칭] ${honorific} — 해석·문구에서 사용자를 부를 땐 반드시 "${honorific}이/가" 형태로만 쓰고, '너·네가' 같은 반말은 쓰지 마세요.`,
+    `[사용자 호칭] ${honorific} — 사용자를 부를 땐 "${honorific}"을 쓰되 한국어 조사를 올바르게 붙이세요(예: "${honorific}이", "${honorific}은", "${honorific}께서"). "${honorific}이가"처럼 조사를 겹쳐 쓰지 말고, '너·네가' 같은 반말도 쓰지 마세요.`,
     `[설문 응답]\n${readableSummary(stage, answers)}`,
     `[사용자가 직접 적은 상황]\n${(answers.freeText || "").trim() || "(없음)"}`,
     `[참고(점수 미반영)] 내 MBTI: ${answers.myMbti || "미입력"}, 상대 MBTI: ${answers.partnerMbti || "미입력"}`,
