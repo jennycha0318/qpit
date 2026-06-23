@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { TabBar } from "@/components/TabBar";
+import { SplashScreen } from "@/components/SplashScreen";
 
 export const metadata: Metadata = {
   title: "큐핏 — AI 연애 타이밍 컨설팅",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="my-auto w-full">{children}</div>
         </div>
         <TabBar />
+        <SplashScreen />
       </body>
     </html>
   );
