@@ -29,8 +29,12 @@ const OUTPUT_SCHEMA = {
       type: "string",
       description: "사용자가 적은 내용에서 본인은 미처 의식하지 못했을 '비자명한 패턴·통찰' 1개(2~3문장). 일반론·이미 아는 조언 금지, 사용자의 구체적 표현·행동을 근거로 한 관찰이어야 함. 마땅한 게 없으면 빈 문자열.",
     },
+    prediction: {
+      type: "string",
+      description: "향후 1~2주 내 사용자가 직접 관찰·반증할 수 있는 구체적 예측 1개(1~2문장). 예: '먼저 연락을 2~3일 줄이면 이 사람이 먼저 연락해 올 가능성이 높아요.' 막연한 '잘 될 거예요' 금지. 마땅하지 않으면 빈 문자열.",
+    },
   },
-  required: ["interpretation", "message", "selfMessage", "keyInsight"],
+  required: ["interpretation", "message", "selfMessage", "keyInsight", "prediction"],
   additionalProperties: false,
 } as const;
 
@@ -46,6 +50,7 @@ function fallback(d: Diagnosis) {
     message: d.hold ? "" : d.msg ?? "",
     selfMessage: d.selfMessage ?? "",
     keyInsight: "",
+    prediction: "",
   });
 }
 
@@ -86,6 +91,7 @@ const SYSTEM_PROMPT = `당신은 한국어로 답하는 'AI 연애 컨설턴트'
 - message: 요청된 경우에만, 사용자가 상대에게 실제로 보낼 만한 자연스러운 한국어 메시지 1개(2~5줄). 부담스럽지 않고 진솔하게. 요청되지 않으면 빈 문자열("").
 - selfMessage: 상대가 아니라 사용자 자신에게 건네는 따뜻한 한마디. 특히 연락을 권하지 않는 상황(보류·차단·안전)에서는 사용자의 마음을 다독이는 위로 한 줄을 꼭 채우세요(공감 → 정상화 → 자기돌봄). 진단명·단정 금지.
 - keyInsight: 사용자가 적은 내용에서 본인은 미처 연결 짓지 못했을 비자명한 패턴 1개를 짚어주세요(2~3문장). 누구나 아는 일반 조언이 아니라 사용자의 구체적 표현·행동을 근거로 한 '관찰'이어야 합니다. 마땅하지 않으면 빈 문자열.
+- prediction: 향후 1~2주 내 사용자가 O/X로 직접 확인할 수 있는 '반증 가능한' 예측 1개. 막연한 위로('잘 될 거예요')가 아니라 관찰 가능한 구체 사건으로. 규칙 결과와 일관되게.
 - 반드시 주어진 JSON 스키마로만 출력하세요.`;
 
 export async function POST(req: Request) {
@@ -154,6 +160,7 @@ export async function POST(req: Request) {
         : `지금은 연락 대신 마음을 추스를 때예요. 상대가 아니라 ${honorific} 자신에게 건네는 따뜻한 위로·다짐 한마디(2~3줄)를 쓰세요. 연락하고 싶은 충동을 비난하지 말고 "자연스러운 마음"이라고 정상화한 뒤, 오늘 나를 돌보는 쪽으로 부드럽게 이끌어 주세요. 규칙 결과(보류·차단 등)와 일관되게, 단정·진단 표현 없이.`
     }`,
     `4) keyInsight: freeText·'상대에 대한 설명'·설문 응답을 종합해, 사용자가 스스로 말했지만 의미를 연결 짓지는 못했을 패턴 1개를 짚으세요(예: "먼저 연락을 줄일까 고민하면서도 매번 먼저 연락하는 건, ~일 수 있어요"). 뻔한 조언·일반론 금지, 구체 근거 인용. 없으면 빈 문자열. 직전 진단 통찰이 주어졌다면 그와 겹치지 않는 새로운 각도로.`,
+    `5) prediction: 향후 1~2주 내 사용자가 직접 맞았는지 확인할 수 있는 반증 가능한 예측 1개(1~2문장). 규칙 결과·추천 행동과 일관되게, 관찰 가능한 구체 사건으로(예: 추천대로 했을 때 상대의 예상 반응). 마땅하지 않으면 빈 문자열.`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -174,7 +181,7 @@ export async function POST(req: Request) {
     const textBlock = resp.content.find((b) => b.type === "text");
     if (!textBlock || textBlock.type !== "text") return fallback(d);
 
-    let parsed: { interpretation?: string; message?: string; selfMessage?: string; keyInsight?: string };
+    let parsed: { interpretation?: string; message?: string; selfMessage?: string; keyInsight?: string; prediction?: string };
     try {
       parsed = JSON.parse(textBlock.text);
     } catch {
@@ -185,7 +192,8 @@ export async function POST(req: Request) {
     const message = wantMessage ? (parsed.message || "").trim() || d.msg || "" : "";
     const selfMessage = (parsed.selfMessage || "").trim() || d.selfMessage || "";
     const keyInsight = (parsed.keyInsight || "").trim();
-    return NextResponse.json({ source: "ai" as const, interpretation, message, selfMessage, keyInsight });
+    const prediction = (parsed.prediction || "").trim();
+    return NextResponse.json({ source: "ai" as const, interpretation, message, selfMessage, keyInsight, prediction });
   } catch {
     // 호출 실패(네트워크·인증·과금 등) → 규칙 결과로 폴백
     return fallback(d);

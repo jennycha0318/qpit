@@ -54,6 +54,17 @@ export function Report({ d, diagnosisId }: { d: Diagnosis; diagnosisId?: string 
         </div>
       </section>
 
+      {/* 큐핏의 예측 — 반증 가능한 한 줄. 재방문 시 '맞았나요?'로 검증(신뢰의 정점) */}
+      {d.prediction && !d.needsSupport && (
+        <section className="mt-7">
+          <p className="text-[12.5px] font-bold uppercase tracking-wide text-muted">큐핏의 예측</p>
+          <div className="card mt-3.5 border border-accent/40 bg-accent/5">
+            <p className="text-[15px] leading-relaxed text-ink">{d.prediction}</p>
+            <p className="mt-2.5 text-[12.5px] text-muted">다음에 다시 들르면 “이 예측, 맞았나요?”로 확인해요.</p>
+          </div>
+        </section>
+      )}
+
       {/* ── 그룹 2: 다음 행동 (언제·어떻게 → 추천 액션 → 주의) ── */}
       <section className="mt-7 flex flex-col gap-3.5">
         <p className="text-[12.5px] font-bold uppercase tracking-wide text-muted">다음 행동</p>
