@@ -100,11 +100,14 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100svh-9rem)] flex-col">
-      <h2 className="mb-1.5 text-[26px] font-bold tracking-tight">큐핏 상담</h2>
-      <p className="mb-5 text-sm text-muted">진단 결과나 연애 고민을 편하게 물어보세요.</p>
+    <div
+      className="fixed inset-x-0 top-0 z-10 mx-auto flex max-w-app flex-col px-5 pt-6"
+      style={{ bottom: "max(6rem, calc(5.5rem + env(safe-area-inset-bottom)))" }}
+    >
+      <h2 className="mb-1.5 shrink-0 text-[26px] font-bold tracking-tight">큐핏 상담</h2>
+      <p className="mb-4 shrink-0 text-sm text-muted">진단 결과나 연애 고민을 편하게 물어보세요.</p>
 
-      <div className="flex-1 space-y-3 overflow-y-auto pb-3">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pb-3">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
@@ -128,7 +131,7 @@ export default function ChatPage() {
         <div ref={endRef} />
       </div>
 
-      <div className="flex flex-wrap gap-1.5 pb-2">
+      <div className="flex shrink-0 flex-wrap gap-1.5 pb-2">
         {CHIPS.map((c) => (
           <button
             key={c.label}
@@ -141,7 +144,7 @@ export default function ChatPage() {
         ))}
       </div>
 
-      <div className="flex items-end gap-2 border-t border-line pt-2.5">
+      <div className="flex shrink-0 items-end gap-2 border-t border-line pt-2.5">
         <textarea
           ref={taRef}
           className="field-input max-h-32 min-h-[46px] flex-1 resize-none py-3"
@@ -159,7 +162,7 @@ export default function ChatPage() {
           전송
         </button>
       </div>
-      <p className="mt-2 text-center text-[11px] text-muted">큐핏은 참고용 조언이에요. 위급한 상황은 112·1366으로 연락하세요.</p>
+      <p className="mt-2 shrink-0 text-center text-[11px] text-muted">큐핏은 참고용 조언이에요. 위급한 상황은 112·1366으로 연락하세요.</p>
     </div>
   );
 }
