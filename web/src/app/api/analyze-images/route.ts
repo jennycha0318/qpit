@@ -7,6 +7,8 @@ export const dynamic = "force-dynamic";
 // 카톡 대화 캡처 분석(추가 옵션) — 비전. Sonnet 4.6. (2026-06-25 Opus 실험 → NPS 무변으로 원복.)
 const MODEL = "claude-sonnet-4-6";
 const MEDIA = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
+// 캡처 분석 결과에 명백한 위협·폭력 신호가 보이면 안전 안내를 덧붙인다(관계 분석으로 희석 방지).
+const EMERGENCY = /자살|죽고\s*싶|자해|때리|때렸|폭행|구타|폭력|협박|감금|스토킹|강간|성폭행|죽이겠|죽여\s*버|찾아가겠|찾아간다|가만\s*안\s*둬/;
 
 const SYSTEM = `당신은 한국어 'AI 연애 컨설턴트'입니다. 사용자와 상대의 카카오톡 대화 캡처를 보고 상대의 관심도·감정 온도·애착 성향(안정/불안/회피)·연락 패턴 단서를 분석합니다.
 
@@ -70,6 +72,13 @@ export async function POST(req: Request) {
     const analysis = (block && block.type === "text" ? block.text : "").replace(/\*\*/g, "").trim();
     if (resp.stop_reason === "refusal" || !analysis) {
       return NextResponse.json({ error: "이 이미지는 분석하기 어려워요. 대화가 잘 보이는 캡처로 다시 시도해 주세요." });
+    }
+    if (EMERGENCY.test(analysis)) {
+      return NextResponse.json({
+        analysis:
+          analysis +
+          "\n\n⚠️ 대화에서 위협·폭력으로 읽힐 수 있는 신호가 보여요. 안전이 가장 중요해요 — 위급하면 112, 여성긴급전화 1366(24시간·폭력/위기 상담)의 도움을 받으세요.",
+      });
     }
     return NextResponse.json({ analysis });
   } catch {

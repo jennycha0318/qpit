@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { diagnose, type Answers, type Diagnosis } from "@/lib/diagnose/engine";
 import { SURVEYS, STAGE_LABEL, type Stage } from "@/lib/diagnose/survey";
+import { analyzeFreeText } from "@/lib/diagnose/freetext";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -79,7 +80,7 @@ const SYSTEM_PROMPT = `당신은 한국어로 답하는 'AI 연애 컨설턴트'
 - 안전 최우선: 통제·위협·폭력·자해 신호가 보이면 관계 조언보다 도움 요청을 우선하세요.
 
 [제약]
-- 점수·타이밍·안전 판단(보류·차단·위기·미성년)은 '규칙 엔진'이 확정한 기준이니 그 '방향'을 뒤집지 마세요. 다만 해석·코칭(다음 행동·구체적 조언·문구)은 규칙의 예시 액션을 그대로 따를 필요 없이, 그 사람의 구체적 상황·회고에 맞춰 자유롭고 신선하게 발전시키세요(정형 조언 복붙 금지, 회차마다 다른 각도·다음 단계). 단 어떤 경우에도 규칙의 타이밍·안전 판단과 모순되거나, 집착·반복연락·우회연락·상대의 거부(차단 등) 무시를 권하지 마세요.
+- 규칙 엔진 결과를 다음 3단계로 다루세요. ① 절대 유지: 점수 등급(높음/보통/낮음)·보류 여부·안전 판단(차단·위기·미성년)은 절대 뒤집지 마세요. ② 방향·근거는 유지하되 표현은 자유: 타이밍 뉘앙스·추천 액션의 순서·근거 서술은 규칙 정형에 갇히지 말고 그 사람의 상황·회고에 맞게 재구성하세요. ③ 전면 창의: 해석의 각도·감정 명명·selfMessage·keyInsight·prediction은 자유롭고 신선하게(정형 복붙 금지, 회차마다 다른 각도·다음 단계). 단 어떤 경우에도 ①의 방향·안전 판단과 모순되거나, 집착·반복연락·우회연락·상대의 거부(차단 등) 무시를 권하지 마세요.
 - 의료·법률·투자 등 전문 조언은 하지 마세요.
 - 사용자를 지칭할 때는 사용자 메시지의 '[사용자 호칭]'에 주어진 호칭(예: "민지님이" 또는 "당신이")만 사용하고, '너·네가' 같은 반말 호칭은 절대 쓰지 마세요.
 - 미성년(minor)이면 더 따뜻하고 지지적인 눈높이로, 자극적·선정적 표현 없이. 필요하면 신뢰할 수 있는 어른·상담을 권할 수 있어요.
@@ -119,8 +120,10 @@ export async function POST(req: Request) {
   d.minor = minor;
 
   // 안전 우선: 학대 신고 케이스는 AI 우회, 규칙의 안전 메시지를 그대로 사용
-  const isAbuse = (stage === "dating" || stage === "breakup") && answers.abuse === "yes";
-  if (isAbuse) return fallback(d);
+  // 안전·위기(학대 신고 — 모든 단계 / 자유서술의 자해·폭력·강압통제 신호)는 AI 해석·예측을 거치지 않고
+  // 규칙 기반 안전 응답으로(위기에 낙관·헛된 희망·반증가능 예측이 새어나가지 않게). 평범한 저점수·매달림은 제외.
+  const isCrisis = answers.abuse === "yes" || analyzeFreeText(answers.freeText).needsSupport;
+  if (isCrisis) return fallback(d);
 
   // 키 미설정(로컬/배포 env) → 규칙 결과로 폴백 (앱은 키 없이도 정상 동작)
   if (!process.env.ANTHROPIC_API_KEY) return fallback(d);
