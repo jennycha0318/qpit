@@ -271,10 +271,11 @@ export default function DiagnosePage() {
       ]);
 
       if (interpretRes && interpretRes.ok) {
-        const data = (await interpretRes.json()) as { interpretation?: string; message?: string; selfMessage?: string };
+        const data = (await interpretRes.json()) as { interpretation?: string; message?: string; selfMessage?: string; keyInsight?: string };
         if (data.interpretation) next.reason = data.interpretation;
         if (!d.hold && data.message) next.msg = data.message;
         if (d.hold && data.selfMessage) next.selfMessage = data.selfMessage;
+        if (data.keyInsight) next.keyInsight = data.keyInsight;
       }
       if (imgRes && imgRes.ok) {
         const data = (await imgRes.json()) as { analysis?: string };
@@ -398,10 +399,41 @@ export default function DiagnosePage() {
           value={partnerNote}
           onChange={(e) => setPartnerNote(e.target.value)}
         />
-        <p className="mb-5 mt-1.5 text-[12.5px] text-muted">적어주시면 상대 성향까지 함께 분석해 더 맞춤 조언을 드려요.</p>
+        <p className="mb-4 mt-1.5 text-[12.5px] text-muted">적어주시면 상대 성향까지 함께 분석해 더 맞춤 조언을 드려요.</p>
+
+        <label className="mb-1.5 block text-[13px] font-bold">상대와의 카톡 대화 <span className="font-normal text-muted">(선택 · 무료)</span></label>
+        <p className="mb-2.5 text-[12.5px] text-muted">캡처(최대 3장)를 올리면 상대의 관심도·온도·연락 패턴까지 읽어 훨씬 정확해져요.</p>
+        <input
+          ref={kakaoInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          aria-label="카톡 캡처 선택"
+          onChange={(e) => {
+            const files = Array.from(e.target.files ?? []).slice(0, 3);
+            setKakaoFiles(files.map((file) => ({ url: URL.createObjectURL(file), file })));
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => kakaoInputRef.current?.click()}
+          className="w-full rounded-2xl border border-dashed border-accent/60 bg-accent/5 py-3.5 text-sm font-bold text-primaryDark transition active:scale-[0.98] hover:bg-accent/10"
+        >
+          카톡 캡처 올리기 (최대 3장)
+        </button>
+        {kakaoFiles.length > 0 && (
+          <div className="mt-3 flex gap-2">
+            {kakaoFiles.map((p, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={i} src={p.url} alt={`캡처 ${i + 1}`} className="h-16 w-16 rounded-lg border border-line object-cover" />
+            ))}
+          </div>
+        )}
+        <div className="mb-5" />
 
         <button className="btn btn-primary" onClick={() => setPhase("survey")}>다음</button>
-        <button className="btn btn-ghost mt-2.5" onClick={() => { setPartnerBirthYear(""); setPartnerMbti(""); setPartnerNote(""); setPhase("survey"); }}>모르겠어요 · 건너뛰기</button>
+        <button className="btn btn-ghost mt-2.5" onClick={() => { setPartnerBirthYear(""); setPartnerMbti(""); setPartnerNote(""); setKakaoFiles([]); setPhase("survey"); }}>모르겠어요 · 건너뛰기</button>
       </div>
     );
   }
@@ -480,8 +512,7 @@ export default function DiagnosePage() {
 
   // ── 설문 (마지막 단계는 카톡 캡처 분석(선택) = N/N) ──
   const survey = SURVEYS[stage];
-  const total = survey.length + 1;
-  const isImageStep = qIndex >= survey.length;
+  const total = survey.length;
   const q = survey[qIndex];
 
   return (
@@ -495,45 +526,7 @@ export default function DiagnosePage() {
       </div>
       <p className="mb-2.5 text-[13px] font-bold text-primaryDark">질문 {qIndex + 1} / {total}</p>
 
-      {isImageStep ? (
-        <div>
-          <h2 className="mb-2 text-[25px] font-bold leading-snug tracking-tight">카톡 대화도 분석해볼까요?</h2>
-          <p className="mb-4 text-sm leading-relaxed text-muted">
-            상대와의 카톡 캡처(최대 3장)를 올리면 상대의 관심도·온도·연락 패턴을 함께 분석해 드려요.{" "}
-            <b className="text-primaryDark">추가 분석(유료 예정)</b> · 캡처 없이 진단해도 돼요.
-          </p>
-          <input
-            ref={kakaoInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            aria-label="카톡 캡처 선택"
-            onChange={(e) => {
-              const files = Array.from(e.target.files ?? []).slice(0, 3);
-              setKakaoFiles(files.map((file) => ({ url: URL.createObjectURL(file), file })));
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => kakaoInputRef.current?.click()}
-            className="w-full rounded-2xl border border-dashed border-accent/50 bg-white/50 py-4 text-sm font-bold text-primaryDark transition active:scale-[0.98] hover:bg-white/70"
-          >
-            캡처 선택 (최대 3장)
-          </button>
-          {kakaoFiles.length > 0 && (
-            <div className="mt-3 flex gap-2">
-              {kakaoFiles.map((p, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={p.url} alt={`캡처 ${i + 1}`} className="h-16 w-16 rounded-lg border border-line object-cover" />
-              ))}
-            </div>
-          )}
-          <button className="btn btn-primary mt-4" onClick={() => finish({ ...answers, freeText: free })}>
-            {kakaoFiles.length > 0 ? `진단하기 (캡처 ${kakaoFiles.length}장 포함)` : "진단하기"}
-          </button>
-        </div>
-      ) : q.type === "text" ? (
+      {q.type === "text" ? (
         <div>
           <h2 className="mb-6 text-[25px] font-bold leading-snug tracking-tight">{q.title}</h2>
           {q.desc && <p className="-mt-4 mb-3.5 text-sm text-muted">{q.desc}</p>}
@@ -544,10 +537,10 @@ export default function DiagnosePage() {
           )}
           <button
             className="btn btn-primary mt-3.5 disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => setQIndex(qIndex + 1)}
+            onClick={() => finish({ ...answers, freeText: free })}
             disabled={free.trim().length < 10}
           >
-            다음
+            진단하기
           </button>
         </div>
       ) : (

@@ -20,6 +20,7 @@ export interface Diagnosis {
   msg?: string;
   hold?: string;
   selfMessage?: string; // 연락을 권하지 않는(보류·차단·안전) 상황에서 사용자 자신에게 건네는 위로 한마디
+  keyInsight?: string; // 사용자가 미처 몰랐을 비자명한 통찰 1줄(AI) — 결과 상단 강조
   plan: Plan;
   needsSupport?: boolean; // 정서 위기 신호 → 상담 연결 노출
   minor?: boolean; // 미성년(10대) → 청소년 눈높이 톤 + 지지 강화

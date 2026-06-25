@@ -17,6 +17,19 @@ export function Report({ d, diagnosisId }: { d: Diagnosis; diagnosisId?: string 
 
   return (
     <div className="flex flex-col">
+      {/* 큐핏이 발견한 것 — 비자명한 통찰(있을 때만, 위기 케이스 제외) 최상단 강조 */}
+      {d.keyInsight && !d.needsSupport && (
+        <div className="mb-6 rounded-[18px] border border-primary/40 bg-gradient-to-br from-[#efeafc] to-[#e7f4f3] p-4">
+          <p className="mb-1.5 flex items-center gap-1.5 text-[12.5px] font-bold uppercase tracking-wide text-primaryDark">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" />
+            </svg>
+            큐핏이 발견한 것
+          </p>
+          <p className="text-[15px] font-medium leading-relaxed text-ink">{d.keyInsight}</p>
+        </div>
+      )}
+
       {/* ── 그룹 1: 결과 (위기 → 점수) ── */}
       <section className="flex flex-col gap-3.5">
         <p className="text-[12.5px] font-bold uppercase tracking-wide text-muted">결과</p>

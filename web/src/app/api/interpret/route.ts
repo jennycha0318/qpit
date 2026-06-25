@@ -25,8 +25,12 @@ const OUTPUT_SCHEMA = {
       type: "string",
       description: "상대가 아니라 사용자 자신에게 건네는 따뜻한 위로·다짐 한마디. 특히 연락을 권하지 않는 보류·차단·안전 상황에서 2~3줄로 꼭 채울 것.",
     },
+    keyInsight: {
+      type: "string",
+      description: "사용자가 적은 내용에서 본인은 미처 의식하지 못했을 '비자명한 패턴·통찰' 1개(2~3문장). 일반론·이미 아는 조언 금지, 사용자의 구체적 표현·행동을 근거로 한 관찰이어야 함. 마땅한 게 없으면 빈 문자열.",
+    },
   },
-  required: ["interpretation", "message", "selfMessage"],
+  required: ["interpretation", "message", "selfMessage", "keyInsight"],
   additionalProperties: false,
 } as const;
 
@@ -41,6 +45,7 @@ function fallback(d: Diagnosis) {
     interpretation: d.reason ?? "",
     message: d.hold ? "" : d.msg ?? "",
     selfMessage: d.selfMessage ?? "",
+    keyInsight: "",
   });
 }
 
@@ -79,6 +84,7 @@ const SYSTEM_PROMPT = `당신은 한국어로 답하는 'AI 연애 컨설턴트'
 - interpretation: 반드시 첫 문장에서 사용자가 지금 느낄 감정을 구체적으로 명명하고 "그럴 만하다"고 정상화하세요(사용자가 직접 적은 표현·단어를 인용한 구체적 공감 — 막연한 일반론 위로 금지). 그다음 문장부터 규칙 결과와 일관되게 상황을 해석하세요(총 3~5문장). 진단명·단정은 금지.
 - message: 요청된 경우에만, 사용자가 상대에게 실제로 보낼 만한 자연스러운 한국어 메시지 1개(2~5줄). 부담스럽지 않고 진솔하게. 요청되지 않으면 빈 문자열("").
 - selfMessage: 상대가 아니라 사용자 자신에게 건네는 따뜻한 한마디. 특히 연락을 권하지 않는 상황(보류·차단·안전)에서는 사용자의 마음을 다독이는 위로 한 줄을 꼭 채우세요(공감 → 정상화 → 자기돌봄). 진단명·단정 금지.
+- keyInsight: 사용자가 적은 내용에서 본인은 미처 연결 짓지 못했을 비자명한 패턴 1개를 짚어주세요(2~3문장). 누구나 아는 일반 조언이 아니라 사용자의 구체적 표현·행동을 근거로 한 '관찰'이어야 합니다. 마땅하지 않으면 빈 문자열.
 - 반드시 주어진 JSON 스키마로만 출력하세요.`;
 
 export async function POST(req: Request) {
@@ -143,6 +149,7 @@ export async function POST(req: Request) {
         ? `상대가 아니라 ${honorific} 자신에게 건네는 짧은 응원 한마디(1~2줄).`
         : `지금은 연락 대신 마음을 추스를 때예요. 상대가 아니라 ${honorific} 자신에게 건네는 따뜻한 위로·다짐 한마디(2~3줄)를 쓰세요. 연락하고 싶은 충동을 비난하지 말고 "자연스러운 마음"이라고 정상화한 뒤, 오늘 나를 돌보는 쪽으로 부드럽게 이끌어 주세요. 규칙 결과(보류·차단 등)와 일관되게, 단정·진단 표현 없이.`
     }`,
+    `4) keyInsight: freeText·'상대에 대한 설명'·설문 응답을 종합해, 사용자가 스스로 말했지만 의미를 연결 짓지는 못했을 패턴 1개를 짚으세요(예: "먼저 연락을 줄일까 고민하면서도 매번 먼저 연락하는 건, ~일 수 있어요"). 뻔한 조언·일반론 금지, 구체 근거 인용. 없으면 빈 문자열.`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -163,7 +170,7 @@ export async function POST(req: Request) {
     const textBlock = resp.content.find((b) => b.type === "text");
     if (!textBlock || textBlock.type !== "text") return fallback(d);
 
-    let parsed: { interpretation?: string; message?: string; selfMessage?: string };
+    let parsed: { interpretation?: string; message?: string; selfMessage?: string; keyInsight?: string };
     try {
       parsed = JSON.parse(textBlock.text);
     } catch {
@@ -173,7 +180,8 @@ export async function POST(req: Request) {
     const interpretation = (parsed.interpretation || "").trim() || d.reason || "";
     const message = wantMessage ? (parsed.message || "").trim() || d.msg || "" : "";
     const selfMessage = (parsed.selfMessage || "").trim() || d.selfMessage || "";
-    return NextResponse.json({ source: "ai" as const, interpretation, message, selfMessage });
+    const keyInsight = (parsed.keyInsight || "").trim();
+    return NextResponse.json({ source: "ai" as const, interpretation, message, selfMessage, keyInsight });
   } catch {
     // 호출 실패(네트워크·인증·과금 등) → 규칙 결과로 폴백
     return fallback(d);
