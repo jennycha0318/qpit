@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Report } from "@/components/Report";
 import { DeleteDiagnosisButton } from "@/components/DeleteDiagnosisButton";
+import { OutcomeWidget } from "@/components/OutcomeWidget";
 import type { Diagnosis } from "@/lib/diagnose/engine";
 import { STAGE_LABEL, type Stage } from "@/lib/diagnose/survey";
 
@@ -34,6 +35,18 @@ export default async function HistoryDetailPage({
   // 필수 필드 누락(깨진 데이터)이면 Report 크래시 대신 404
   if (typeof d.score !== "number" || !d.plan || !Array.isArray(d.factors)) notFound();
 
+  // 그 뒤 이야기(예측 검증·사후 체크인) — 테이블/권한 없으면 빈 값으로 안전 처리
+  const { data: outRows } = await supabase
+    .from("diagnosis_outcomes")
+    .select("kind, value")
+    .eq("diagnosis_id", id)
+    .order("created_at", { ascending: false });
+  const outcomes = (outRows ?? []) as { kind: string; value: string }[];
+  const existing = {
+    prediction: outcomes.find((o) => o.kind === "prediction")?.value,
+    checkin: outcomes.find((o) => o.kind === "checkin")?.value,
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between gap-2">
@@ -44,6 +57,7 @@ export default async function HistoryDetailPage({
         {STAGE_LABEL[data.stage as Stage] ?? "진단"} · {fmt(data.created_at as string)}
       </p>
       <Report d={d} diagnosisId={id} />
+      {!d.needsSupport && <OutcomeWidget diagnosisId={id} d={d} existing={existing} />}
     </div>
   );
 }

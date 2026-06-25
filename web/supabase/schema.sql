@@ -82,3 +82,33 @@ create policy "diagnosis_chats_delete_own"
 
 create index if not exists diagnosis_chats_diag
   on public.diagnosis_chats (diagnosis_id, created_at);
+
+-- 진단 결과 회수(예측 검증 + 사후 체크인) — 재방문 시 '맞았나요/어떻게 됐어요' 기록. 추천(NPS) 정점 포착용.
+create table if not exists public.diagnosis_outcomes (
+  id uuid primary key default gen_random_uuid(),
+  diagnosis_id uuid references public.diagnoses (id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  kind text not null,                  -- 'prediction'(예측 적중) | 'checkin'(사후 결과)
+  value text not null,                 -- correct|partial|wrong  또는  good|soso|bad
+  created_at timestamptz not null default now()
+);
+
+alter table public.diagnosis_outcomes enable row level security;
+
+drop policy if exists "diagnosis_outcomes_select_own" on public.diagnosis_outcomes;
+create policy "diagnosis_outcomes_select_own"
+  on public.diagnosis_outcomes for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "diagnosis_outcomes_insert_own" on public.diagnosis_outcomes;
+create policy "diagnosis_outcomes_insert_own"
+  on public.diagnosis_outcomes for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "diagnosis_outcomes_delete_own" on public.diagnosis_outcomes;
+create policy "diagnosis_outcomes_delete_own"
+  on public.diagnosis_outcomes for delete
+  using (auth.uid() = user_id);
+
+create index if not exists diagnosis_outcomes_diag
+  on public.diagnosis_outcomes (diagnosis_id, created_at);
