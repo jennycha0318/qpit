@@ -86,6 +86,11 @@ export default function ChatPage() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  // 비회원이 채팅에 들어오면 게이트 화면 대신 바로 로그인 화면으로
+  useEffect(() => {
+    if (loggedIn === false) window.location.replace("/login");
+  }, [loggedIn]);
+
   async function send() {
     const text = input.trim();
     if (!text || loading) return;
@@ -108,18 +113,8 @@ export default function ChatPage() {
     }
   }
 
-  // 비회원(게스트)은 채팅 비활성 — 로그인 유도
-  if (loggedIn === null) return <div className="pt-10 text-center text-sm text-muted">불러오는 중…</div>;
-  if (!loggedIn) {
-    return (
-      <div className="px-1 pt-10 text-center">
-        <h2 className="mb-2 text-[22px] font-bold tracking-tight">큐핏 상담은 로그인 후 이용할 수 있어요</h2>
-        <p className="mb-6 text-sm text-muted">로그인하면 진단 결과를 기억하고, 이어지는 상담과 예측 검증까지 받을 수 있어요.</p>
-        <Link href="/login" className="btn btn-primary block text-center">로그인하고 상담받기</Link>
-        <Link href="/diagnose" className="mt-3 inline-block text-sm font-bold text-primaryDark">먼저 진단부터 해보기</Link>
-      </div>
-    );
-  }
+  // 비회원은 로그인 화면으로 리다이렉트(위 useEffect) — 그동안은 로딩만 표시
+  if (!loggedIn) return <div className="pt-10 text-center text-sm text-muted">불러오는 중…</div>;
 
   // 진단 이력이 없으면(핸드오프·DB 모두 없음) 채팅 비활성 — 진단 먼저
   if (hasDiagnosis === null) return <div className="pt-10 text-center text-sm text-muted">불러오는 중…</div>;
