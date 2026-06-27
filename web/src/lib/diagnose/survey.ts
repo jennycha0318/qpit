@@ -45,7 +45,7 @@ const FREE_TEXT_Q: Question = {
   id: "freeText",
   type: "text",
   title: "지금 어떤 상황인지 적어주세요",
-  desc: "정확한 분석을 위해 꼭 필요해요. 자세히 적을수록 더 정확해집니다. 입력 내용은 분석을 위해 AI에 전송돼요(비회원은 저장되지 않아요).",
+  desc: "정확한 분석을 위해 꼭 필요해요. 자세히 적을수록 더 정확해집니다. 입력 내용은 분석을 위해 AI에 전송돼요.",
   placeholder: "예) 일이 바빠서 소홀했고, 마지막에 크게 싸우고 헤어졌어요…",
 };
 const ABUSE_Q: Question = {

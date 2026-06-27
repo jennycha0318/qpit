@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getProfile } from "@/lib/profile";
 
@@ -26,6 +27,7 @@ export default function ChatPage() {
   const [context, setContext] = useState("");
   const [name, setName] = useState("");
   const [diagnosisId, setDiagnosisId] = useState<string | null>(null);
+  const [loggedIn, setLoggedIn] = useState<boolean | null>(null); // null=확인중, false=비회원(게이트)
   const endRef = useRef<HTMLDivElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
 
@@ -48,6 +50,7 @@ export default function ChatPage() {
       try {
         const supabase = createClient();
         const { data } = await supabase.auth.getUser();
+        setLoggedIn(!!data?.user);
         if (!data?.user) return;
         const p = await getProfile(supabase);
         if (p) setName(p.nickname || p.name || "");
@@ -70,7 +73,7 @@ export default function ChatPage() {
           );
         }
       } catch {
-        // 무시 — 컨텍스트 없이도 일반 상담 가능
+        setLoggedIn((v) => v ?? false); // getUser 실패 시에만 비회원 처리(이미 판정됐으면 유지)
       }
     })();
   }, []);
@@ -99,6 +102,19 @@ export default function ChatPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // 비회원(게스트)은 채팅 비활성 — 로그인 유도
+  if (loggedIn === null) return <div className="pt-10 text-center text-sm text-muted">불러오는 중…</div>;
+  if (!loggedIn) {
+    return (
+      <div className="px-1 pt-10 text-center">
+        <h2 className="mb-2 text-[22px] font-bold tracking-tight">큐핏 상담은 로그인 후 이용할 수 있어요</h2>
+        <p className="mb-6 text-sm text-muted">로그인하면 진단 결과를 기억하고, 이어지는 상담과 예측 검증까지 받을 수 있어요.</p>
+        <Link href="/login" className="btn btn-primary block text-center">로그인하고 상담받기</Link>
+        <Link href="/diagnose" className="mt-3 inline-block text-sm font-bold text-primaryDark">먼저 진단부터 해보기</Link>
+      </div>
+    );
   }
 
   return (

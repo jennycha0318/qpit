@@ -623,7 +623,7 @@ export default function DiagnosePage() {
           </div>
         )}
 
-        <Report d={result} diagnosisId={savedId ?? undefined} />
+        <Report d={result} diagnosisId={savedId ?? undefined} loggedIn={loggedIn} />
         <button className="btn btn-ghost mt-5" onClick={reset}>다시 진단하기</button>
         {saveStatus === "guest" && (
           <Link href="/" className="btn btn-ghost mt-3 block text-center">처음으로</Link>

@@ -1,10 +1,12 @@
+import Link from "next/link";
 import type { Diagnosis } from "@/lib/diagnose/engine";
 import { CrisisResources, LegalEthicsNotice } from "@/components/SupportNotices";
 import { ShareButton } from "@/components/ShareButton";
 import { AskCupidButton } from "@/components/AskCupidButton";
 import { scoreColor, scoreBadge, toneColor } from "@/lib/diagnose/colors";
 
-export function Report({ d, diagnosisId }: { d: Diagnosis; diagnosisId?: string }) {
+// loggedIn: 비회원(게스트) 진단이면 false — 채팅(큐핏 상담) 진입을 막고 로그인 유도. 기본 true(히스토리 등).
+export function Report({ d, diagnosisId, loggedIn = true }: { d: Diagnosis; diagnosisId?: string; loggedIn?: boolean }) {
   const color = scoreColor(d.score);
   const badge = scoreBadge(d.score);
   const C = 2 * Math.PI * 52;
@@ -212,10 +214,14 @@ export function Report({ d, diagnosisId }: { d: Diagnosis; diagnosisId?: string 
         </section>
       )}
 
-      {/* 이 결과로 큐핏 챗봇 상담 연결 (위기·안전 케이스는 상담 연결을 우선하므로 제외) */}
+      {/* 이 결과로 큐핏 챗봇 상담 연결 (위기·안전 케이스 제외 / 비회원은 로그인 유도) */}
       {!d.needsSupport && (
         <div className="mt-7">
-          <AskCupidButton d={d} diagnosisId={diagnosisId} />
+          {loggedIn ? (
+            <AskCupidButton d={d} diagnosisId={diagnosisId} />
+          ) : (
+            <Link href="/login" className="btn btn-ghost block text-center">로그인하고 큐핏에게 이어서 물어보기</Link>
+          )}
         </div>
       )}
 
