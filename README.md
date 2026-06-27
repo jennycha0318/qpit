@@ -7,7 +7,7 @@
 **언제·어떻게 행동해야 성공 확률이 높은지** 알려주는 AI 연애 컨설턴트.
 
 ## 라이브
-- 🌐 https://pacemaker-six-eta.vercel.app
+- 🌐 https://qpit.vercel.app
 
 ## 지금까지 만든 것 (현재 상태)
 - **인증** — 이메일/비밀번호 + Google OAuth + 비밀번호 재설정 (Supabase Auth)

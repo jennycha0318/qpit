@@ -13,7 +13,7 @@
 ## 2. 기술 스택 · 인프라
 - **프런트/백:** Next.js 15 (App Router, TS, Tailwind, React 19) — 코드 루트 `web/`.
 - **인증/DB:** Supabase (이메일 + Google OAuth + 진단 히스토리, RLS). 프로젝트 `https://dtvhjowhlefutlyovqrx.supabase.co`.
-- **배포:** Vercel, GitHub `main` 푸시 시 자동 배포. 프로덕션 `https://pacemaker-six-eta.vercel.app`. 레포 `github.com/jennycha0318/pacemaker`.
+- **배포:** Vercel, GitHub `main` 푸시 시 자동 배포. 프로덕션 `https://qpit.vercel.app`. 레포 `github.com/jennycha0318/pacemaker`.
 - **환경변수(서버 전용, NEXT_PUBLIC 금지):** `ANTHROPIC_API_KEY`. 그 외 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. → `.env.local`(로컬) + Vercel Project Settings(Production 스코프) 양쪽 필요. **env 추가 후 Vercel은 반드시 Redeploy 해야 반영.**
 
 ## 3. AI 아키텍처

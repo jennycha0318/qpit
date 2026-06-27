@@ -1,7 +1,7 @@
 # Functional Spec
 
 Pacemaker 웹앱의 기능 명세. 페이지별 spec + 전체 flow.
-구현체: `web/` (Next.js 15 App Router). Prod: `https://pacemaker-six-eta.vercel.app`
+구현체: `web/` (Next.js 15 App Router). Prod: `https://qpit.vercel.app`
 
 ## 문서 구성
 - [flow.md](flow.md) — 전체 사용자 플로우 (인증·진단·전환·재설정·네비게이션)

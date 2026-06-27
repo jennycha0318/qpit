@@ -12,7 +12,7 @@
 | 프레임워크 | Next.js 15 (App Router, RSC) + TypeScript |
 | 인증 | Supabase Auth (이메일/비번 + Google OAuth + 비번 재설정) |
 | DB | Supabase Postgres + RLS(행 수준 보안) |
-| 호스팅 | Vercel (prod: `https://pacemaker-six-eta.vercel.app`) |
+| 호스팅 | Vercel (prod: `https://qpit.vercel.app`) |
 | Supabase | `https://dtvhjowhlefutlyovqrx.supabase.co` |
 
 > 주의: Supabase가 백엔드(Auth + DB + API)를 담당합니다. 별도 서버 코드 없음.
@@ -182,8 +182,8 @@ create policy "profiles_update_own" ... using (auth.uid() = id);
 - [ ] (구글) Google OAuth provider 설정 + Client ID/Secret
 - [ ] **Authentication → URL Configuration → Redirect URLs** 에 추가:
   - `http://localhost:3000/auth/callback`
-  - `https://pacemaker-six-eta.vercel.app/auth/callback` ← **프로덕션 필수**
-- [ ] **Site URL** 을 `https://pacemaker-six-eta.vercel.app` 로 설정 (이메일 링크 기준)
+  - `https://qpit.vercel.app/auth/callback` ← **프로덕션 필수**
+- [ ] **Site URL** 을 `https://qpit.vercel.app` 로 설정 (이메일 링크 기준)
 
 ### Vercel 설정
 - [ ] 환경변수 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` 등록
